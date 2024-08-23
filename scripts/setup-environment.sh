@@ -22,6 +22,9 @@ fetch_secrets $SECRETS_FILE
 # check if keyvault exists, if not create it
 check_and_create_key_vault
 
+# check if storage account exists
+create_storage_account_and_store_in_keyvault
+
 # check if app_insights is deployed
 check_and_create_app_insights
 

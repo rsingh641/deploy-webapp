@@ -356,4 +356,60 @@ unset_webservice_deployment() {
     fi
 }
 
+create_storage_account_and_store_in_keyvault() {
+    local resource_group=$RESOURCE_GROUP
+    local storage_account_name=$STORAGE_ACCOUNT
+    local key_vault_name=$KEYVAULT_NAME
+
+    # Check if the storage account already exists
+    local account_not_exists=$(az storage account check-name --name $storage_account_name --query 'nameAvailable' --output tsv)
+
+    if [ "$account_not_exists" == "false" ]; then
+        echo "INFO: Storage account $storage_account_name already exists. Skipping creation."
+        return 0
+    fi
+
+    # Create the storage account
+    echo "INFO: Creating storage account: $storage_account_name"
+    az storage account create --name $storage_account_name \
+                             --resource-group $resource_group \
+                             --location $LOCATION \
+                             --sku Standard_LRS \
+                             --kind StorageV2
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to create storage account: $storage_account_name" >&2
+        exit 1
+    fi
+
+    echo "INFO: Storage account $storage_account_name created successfully."
+
+    # Retrieve the storage account keys
+    local keys=$(az storage account keys list --resource-group $resource_group \
+                                              --account-name $storage_account_name \
+                                              --query '[0].{key: value}' \
+                                              --output tsv)
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to retrieve storage account keys for: $storage_account_name" >&2
+        exit 1
+    fi
+
+    # Store the account name and key in Key Vault
+    echo "INFO: Storing storage account credentials in Key Vault: $key_vault_name"
+    az keyvault secret set --vault-name $key_vault_name \
+                           --name "${storage_account_name}-account-name" \
+                           --value $storage_account_name
+
+    az keyvault secret set --vault-name $key_vault_name \
+                           --name "${storage_account_name}-account-key" \
+                           --value $keys
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to store storage account secrets in Key Vault" >&2
+        exit 1
+    fi
+
+    echo "INFO: Storage account credentials stored in Key Vault successfully."
+}
 
