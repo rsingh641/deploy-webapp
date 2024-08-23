@@ -1,7 +1,5 @@
 #! /bin/bash
 
-#Add a detailed explanation of what this script does as a comment here
-
 # Set error handling to exit the script immediately if a command fails
 set -e
 
@@ -9,18 +7,22 @@ logger "INFO" "Deploying Webservice for [$ENV]"
 
 # Check if Azure Spring Apps service exists
 if ! az spring show --name $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP &>/dev/null; then
-    echo "Creating Azure Spring Apps service: $SPRING_APPS_SERVICE"
-    az spring create --name $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP --location $LOCATION
+    logger "INFO" "Creating Azure Spring Apps service: $SPRING_APPS_SERVICE"
+    create_spring_inst="az spring create --name $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP --location $LOCATION  \
+                        --vnet ${VNET_NAME} --app-subnet ${WEBSERVICE_SUBNET_NAME} --service-runtime-subnet ${WEBSERVICE_RUNTIME_SUBNET_NAME}"
+    if [[ $ENABLE_APP_INSIGHTS == "true" ]]; then
+        create_spring_inst="$create_spring_inst --app-insights $APP_INSIGHT_NAME --sampling-rate $APP_INSIGHT_SAMPLING_RATE"
+    fi
 else
-    echo "Azure Spring Apps service $SPRING_APPS_SERVICE already exists"
+    logger "DEBUG" "Azure Spring Apps service $SPRING_APPS_SERVICE already exists"
 fi
 
 # Check if the Spring Boot app exists
 if ! az spring app show --name $APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP &>/dev/null; then
-    echo "Creating Spring Boot app: $APP_NAME"
+    logger "INFO" "Creating Spring Boot app: $APP_NAME"
     az spring app create --name $APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP --runtime-version $JAVA_VERSION
 else
-    echo "Spring Boot app $APP_NAME already exists"
+    logger "DEBUG" "Spring Boot app $APP_NAME already exists"
 fi
 
 # Create App Service Plan

@@ -82,7 +82,7 @@ az_login(){
 }
 
 # Function to check and create Key Vault
-check_create_key_vault() {
+check_and_create_key_vault() {
     logger "INFO" "Checking if Key Vault '$KEY_VAULT_NAME' exists..."
 
     if ! az keyvault show --name $KEY_VAULT_NAME > /dev/null 2>&1; then
@@ -97,7 +97,6 @@ check_create_key_vault() {
         logger "DEBUG" "Key Vault '$KEY_VAULT_NAME' already exists."
     fi
 }
-
 
 # Function to upload DB2 certificate to Key Vault
 upload_db2_cert_to_key_vault() {
@@ -125,4 +124,79 @@ store_oracle_creds_in_key_vault() {
     fi
 }
 
+# Install Azure CLI
+install_azure_cli() {
+    logger "INFO" "Installing Azure CLI..."
+    curl -sL https://aka.ms/InstallAzureCLI | bash
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to install Azure CLI"
+        exit 1
+    fi
+}
 
+# Check and install Azure CLI
+check_az_cli() {
+    logger "INFO" "Checking if Azure CLI is installed..."
+    if [ ! command -v az &> /dev/null ]; then
+        install_azure_cli
+    fi
+    az version
+    if [ $? -ne 0 ]; then
+    logger "ERROR" "Failed to check Azure CLI version"
+        exit 1
+    fi
+    logger "INFO" "Azure CLI is installed."
+
+    # Enabling dynamic install of extensions without prompt
+    az config set extension.use_dynamic_install=yes_without_prompt
+}
+
+# check and create app insights
+check_and_create_app_insights() {
+    # Check if the Application Insights instance exists
+    echo "Checking if Application Insights instance '$APP_INSIGHTS_NAME' exists in resource group '$RESOURCE_GROUP'..."
+    if az monitor app-insights component show --resource-group "$RESOURCE_GROUP" --app "$APP_INSIGHTS_NAME" > /dev/null 2>&1; then
+        echo "Application Insights instance '$APP_INSIGHTS_NAME' already exists."
+    else
+        # Check if we need to create the Application Insights instance
+        if [[ "$ENABLE_APP_INSIGHTS" == "true" ]]; then
+            echo "Application Insights instance '$APP_INSIGHTS_NAME' does not exist. Creating it..."
+            az monitor app-insights component create --app "$APP_INSIGHTS_NAME" --location "$LOCATION" --resource-group "$RESOURCE_GROUP" --kind web
+            if [[ $? -eq 0 ]]; then
+                echo "Application Insights instance '$APP_INSIGHTS_NAME' created successfully."
+            else
+                echo "Failed to create Application Insights instance '$APP_INSIGHTS_NAME'."
+                exit 1
+            fi
+        else
+            echo "Application Insights instance '$APP_INSIGHTS_NAME' does not exist and 'ENABLE_APP_INSIGHTS' flag is not set to true. Skipping creation."
+        fi
+    fi
+}
+
+# Check and create subnets
+check_and_create_subnet() {
+    local $subnet_name=$1
+    local $subnet_prefix=$2
+
+    # Check if the VNet exists
+    # Check if the webservice subnet exists
+    echo "Checking if subnet '$subnet_name' exists in VNet '$VNET_NAME'..."
+    if az network vnet subnet show --resource-group "$RESOURCE_GROUP" --vnet-name "$VNET_NAME" --name "$subnet_name" > /dev/null 2>&1; then
+        echo "Subnet '$subnet_name' already exists."
+    else
+        # Create the subnet if it is allowed
+        if [[ "$ENABLE_SUBNET_CREATION" == "true" ]]; then
+            echo "Subnet '$subnet_name' does not exist. Creating it..."
+            az network vnet subnet create --resource-group "$RESOURCE_GROUP" --vnet-name "$VNET_NAME" --address-prefixes "$subnet_prefix" --name "$subnet_name"
+            if [[ $? -eq 0 ]]; then
+                echo "Subnet '$subnet_name' created successfully."
+            else
+                echo "Failed to create subnet '$subnet_name'."
+                exit 1
+            fi
+        else
+            echo "Subnet '$subnet_name' does not exist and 'ENABLE_SUBNET_CREATION' flag is not set to true. Skipping creation."
+        fi
+    fi
+}
