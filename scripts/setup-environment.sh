@@ -2,22 +2,8 @@
 
 set -e
 
-if [ -z $ENV ]; then ENV=$APP_ENVIRONMENT; fi
-
-SECRETS_FILE="config/environments/${ENV}/secrets.enc.yaml"
-
-PROPERTIES_FILE="config/environments/${ENV}/${ENV}.properties"
-
-source ${PROPERTIES_FILE}
-source helper.sh
-
-check_az_cli
-
-logger "INFO" "Authenticating to Azure"
-az_login
-
-logger "INFO" "Reading secrets from encrypted file"
-fetch_secrets $SECRETS_FILE
+# Initialise the local environment
+source initialize
 
 # check if keyvault exists, if not create it
 check_and_create_key_vault
