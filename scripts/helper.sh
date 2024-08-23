@@ -244,4 +244,116 @@ download_artifact() {
     fi
 }
 
+# Function for scaling webservice
+scale_spring_app() {
+    logger "INFO" "Scaling Spring Boot Application..."
+    local scale_command="az spring app scale --name $SPRING_APP_NAME --resource-group $SPRING_APP_RESOURCE_GROUP --service $SPRING_APP_SERVICE"
+
+    # Append options if they are set
+    [ -n "$SPRING_APP_CPU" ] && scale_command+=" --cpu $SPRING_APP_CPU"
+    [ -n "$SPRING_APP_INSTANCE_COUNT" ] && scale_command+=" --instance-count $SPRING_APP_INSTANCE_COUNT"
+    [ -n "$SPRING_APP_MAX_REPLICAS" ] && scale_command+=" --max-replicas $SPRING_APP_MAX_REPLICAS"
+    [ -n "$SPRING_APP_MEMORY" ] && scale_command+=" --memory $SPRING_APP_MEMORY"
+    [ -n "$SPRING_APP_MIN_REPLICAS" ] && scale_command+=" --min-replicas $SPRING_APP_MIN_REPLICAS"
+    [ -n "$SPRING_APP_SCALE_RULE_NAME" ] && scale_command+=" --scale-rule-name $SPRING_APP_SCALE_RULE_NAME"
+    [ -n "$SPRING_APP_SCALE_RULE_HTTP_CONCURRENCY" ] && scale_command+=" --scale-rule-http-concurrency $SPRING_APP_SCALE_RULE_HTTP_CONCURRENCY"
+    [ -n "$SPRING_APP_SCALE_RULE_TYPE" ] && scale_command+=" --scale-rule-type $SPRING_APP_SCALE_RULE_TYPE"
+    [ -n "$SPRING_APP_DEPLOYMENT_NAME" ] && scale_command+=" --deployment $SPRING_APP_DEPLOYMENT_NAME"
+
+    # Execute the scale command and check for success
+    if eval "$scale_command"; then
+        echo "INFO: Successfully scaled Spring Boot app: $SPRING_APP_NAME"
+    else
+        echo "ERROR: Failed to scale Spring Boot app: $SPRING_APP_NAME" >&2
+        exit 1
+    fi
+}
+
+switch_webservice_deployment() {
+    local deployment_name=$SPRING_APP_DEPLOYMENT_NAME
+    local app_name=$SPRING_APP_NAME
+    local resource_group=$RESOURCE_GROUP
+    local service_name=$SPRING_APP_SERVICE
+
+    # Build the command for setting the deployment
+    local set_deployment_command="az spring app set-deployment --deployment $deployment_name --name $app_name --resource-group $resource_group --service $service_name"
+
+    # Append --no-wait if the NO_WAIT flag is set
+    [ "$SPRING_APP_NO_WAIT" = "true" ] && set_deployment_command+=" --no-wait"
+
+    # Execute the command and check for success
+    if eval "$set_deployment_command"; then
+        echo "INFO: Successfully switched to deployment: $deployment_name for app: $app_name"
+    else
+        echo "ERROR: Failed to switch deployment to: $deployment_name for app: $app_name" >&2
+        exit 1
+    fi
+}
+
+start_webservice() {
+    local app_name=$SPRING_APP_NAME
+    local resource_group=$RESOURCE_GROUP
+    local service_name=$SPRING_APP_SERVICE
+
+    # Build the start command
+    local start_command="az spring app start --name $app_name --resource-group $resource_group --service $service_name"
+
+    # Append --deployment if specified
+    [ -n "$SPRING_APP_DEPLOYMENT_NAME" ] && start_command+=" --deployment $SPRING_APP_DEPLOYMENT_NAME"
+
+    # Append --no-wait if the NO_WAIT flag is set
+    [ "$SPRING_APP_NO_WAIT" = "true" ] && start_command+=" --no-wait"
+
+    # Execute the command and check for success
+    if eval "$start_command"; then
+        echo "INFO: Successfully started Spring Boot app: $app_name"
+    else
+        echo "ERROR: Failed to start Spring Boot app: $app_name" >&2
+        exit 1
+    fi
+}
+
+stop_webservice() {
+    local app_name=$SPRING_APP_NAME
+    local resource_group=$RESOURCE_GROUP
+    local service_name=$SPRING_APP_SERVICE
+
+    # Build the stop command
+    local stop_command="az spring app stop --name $app_name --resource-group $resource_group --service $service_name"
+
+    # Append --deployment if specified
+    [ -n "$SPRING_APP_DEPLOYMENT_NAME" ] && stop_command+=" --deployment $SPRING_APP_DEPLOYMENT_NAME"
+
+    # Append --no-wait if the NO_WAIT flag is set
+    [ "$SPRING_APP_NO_WAIT" = "true" ] && stop_command+=" --no-wait"
+
+    # Execute the command and check for success
+    if eval "$stop_command"; then
+        echo "INFO: Successfully stopped Spring Boot app: $app_name"
+    else
+        echo "ERROR: Failed to stop Spring Boot app: $app_name" >&2
+        exit 1
+    fi
+}
+
+unset_webservice_deployment() {
+    local app_name=$SPRING_APP_NAME
+    local resource_group=$RESOURCE_GROUP
+    local service_name=$SPRING_APP_SERVICE
+
+    # Build the unset-deployment command
+    local unset_deployment_command="az spring app unset-deployment --name $app_name --resource-group $resource_group --service $service_name"
+
+    # Append --no-wait if the NO_WAIT flag is set
+    [ "$SPRING_APP_NO_WAIT" = "true" ] && unset_deployment_command+=" --no-wait"
+
+    # Execute the command and check for success
+    if eval "$unset_deployment_command"; then
+        echo "INFO: Successfully unset the deployment for Spring Boot app: $app_name"
+    else
+        echo "ERROR: Failed to unset the deployment for Spring Boot app: $app_name" >&2
+        exit 1
+    fi
+}
+
 

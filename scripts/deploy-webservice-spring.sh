@@ -60,10 +60,9 @@ logger "INFO" "Deploying Spring Boot application artifact to app: $SPRING_APP_NA
 
 # Deploy the artifact to Azure Spring Apps
 deploy_artifact="az spring app deploy --name $SPRING_APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP \
-                --artifact-url $ARTIFACT_URL --deployment-name $SPRING_APP_DEPLOYMENT_NAME --disable-probe $SPRING_APP_DISABLE_PROBE \
-                --grace-period $SPRING_APP_GRACE_PERIOD --jvm-options=$SPRING_APP_JAVA_OPTIONS' --language-framework "springboot" \
-                --runtime-version $SPRING_APP_RUNTIME_VERSION  
-"
+                --artifact-path $LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME --deployment-name $SPRING_APP_DEPLOYMENT_NAME \
+                --disable-probe $SPRING_APP_DISABLE_PROBE --grace-period $SPRING_APP_GRACE_PERIOD --jvm-options=$SPRING_APP_JAVA_OPTIONS' \
+                --language-framework "springboot" --runtime-version $SPRING_APP_RUNTIME_VERSION --version $APP_VERSION"
 
 eval "$deploy_artifact"
 
