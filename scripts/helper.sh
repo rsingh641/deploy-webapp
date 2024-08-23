@@ -454,3 +454,39 @@ create_storage_account_and_store_in_keyvault() {
     echo "INFO: Storage account credentials stored in Key Vault successfully."
 }
 
+# Add Persistent storage in spring app
+add_storage_to_spring_app() {
+    local resource_group=$RESOURCE_GROUP
+    local spring_service_name=$SPRING_APP_SERVICE_NAME
+    local spring_app_name=$SPRING_APP_tNAME
+    local storage_account_name=$STORAGE_ACCOUNT
+    local key_vault_name=$KEYVAULT_NAME
+
+    # Fetch storage account name and key from Key Vault
+    echo "INFO: Retrieving storage account credentials from Key Vault: $key_vault_name"
+
+    local account_key=$(az keyvault secret show --vault-name $key_vault_name \
+                                               --name "${storage_account_name}-account-key" \
+                                               --query value --output tsv)
+
+    if [ -z "$storage_account_name" ] || [ -z "$account_key" ]; then
+        echo "ERROR: Failed to retrieve storage account credentials from Key Vault" >&2
+        exit 1
+    fi
+
+    # Add storage account to Spring App
+    echo "INFO: Adding storage account $storage_account_name to Spring App $spring_app_name"
+    az spring app storage add --resource-group $resource_group \
+                              --service $spring_service_name \
+                              --name $spring_app_name \
+                              --storage-type StorageAccount \
+                              --account-name $storage_account_name \
+                              --account-key $account_key
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to add storage account $storage_account_name to Spring App $spring_app_name" >&2
+        exit 1
+    fi
+
+    echo "INFO: Storage account $storage_account_name added to Spring App $spring_app_name successfully."
+}
