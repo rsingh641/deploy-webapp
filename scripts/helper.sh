@@ -10,7 +10,7 @@ handle_error() {
 trap 'handle_error $LINENO' ERR
 
 # Function to handle logging
-logger(){
+logger() {
     LEVEL=$1
     MESSAGE=$2
     DATE_STRING=$(date)
@@ -24,7 +24,7 @@ logger(){
 }
 
 # Function to fetch secrets from the encrypted file
-fetch_secrets(){
+fetch_secrets() {
     SECRETS_FILE=$1
     FS=$'\37'
     sops -d $SECRETS_FILE | while read line
@@ -41,8 +41,49 @@ fetch_secrets(){
     done
 }
 
+replace_secrets() {
+    BUILD="$LOCAL_ARTIFACT_DIR"
+    FS=$'\37' # Using escape characters for sed delimiter
+
+    sops -d $SECRETS_FILE | while read line
+    do
+        if [ ${line:0:1} == "#" ]; then
+            continue
+        fi
+        key=$(echo $line | awk '{print $1}' | tr -d ':')
+        value=$(echo $line | sed 's/\"/\\"/g' | awk '{$1="";print}' | xargs echo -n)
+        # Below lines trims leading and trailing " in any property
+        value="${value#\"}"
+        value="${value%\"}"
+
+        # Define application properties file here for
+        find $SCRIPTS_ROOT_DIR -type f -name "*.*" -exec sed -i s${FS}"<${key}>"${FS}${value}${FS}g {} +
+
+    done
+}
+
+replace_properties() {
+    BUILD="$LOCAL_ARTIFACT_DIR"
+    FS=$'\37' # Using escape characters for sed delimiter
+    for line in $(cat  $PROPERTIES_FILE)
+    do
+        if [ ${line:0:1} == "#" ]; then
+            continue
+        fi
+        IFS== read -r key value <<< "$line"
+        if [ "$key" == "*URL" ]; then
+            value=${value//['\']/'\\\'}
+        fi
+
+        # Define application properties file here for
+        find $SCRIPTS_ROOT_DIR -type f -name "*.*" -exec sed -i s${FS}"<${key}>"${FS}${value}${FS}g {} +
+
+    done
+}
+
+
 # Function to login to Azure
-az_login(){
+az_login() {
     # Check if the required environment variables are set
     # Jenkins or Gitlab Secret managers can be used to securely store the below parameters in vault
     # CLIENT_ID, CLIENT_SECRET, TENANT_ID, SUBSCRIPTION_ID can be loaded at runtime in runner's environment
