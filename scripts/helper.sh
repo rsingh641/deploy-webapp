@@ -43,7 +43,6 @@ fetch_secrets(){
 
 # Function to login to Azure
 az_login(){
-    set -e
     # Check if the required environment variables are set
     # Jenkins or Gitlab Secret managers can be used to securely store the below parameters in vault
     # CLIENT_ID, CLIENT_SECRET, TENANT_ID, SUBSCRIPTION_ID can be loaded at runtime in runner's environment
