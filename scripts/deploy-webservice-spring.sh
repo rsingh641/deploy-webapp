@@ -8,11 +8,27 @@ logger "INFO" "Deploying Webservice for [$ENV]"
 # Check if Azure Spring Apps service exists
 if ! az spring show --name $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP &>/dev/null; then
     logger "INFO" "Creating Azure Spring Apps service: $SPRING_APPS_SERVICE"
+
     create_spring_inst="az spring create --name $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP --location $LOCATION  \
-                        --vnet ${VNET_NAME} --app-subnet ${WEBSERVICE_SUBNET_NAME} --service-runtime-subnet ${WEBSERVICE_RUNTIME_SUBNET_NAME}"
+                        --sku ${WEBSERVICE_SKU} --zone-redundant ${WEBSERVICE_ZONE_REDUNDANT} --vnet ${VNET_NAME} \
+                        --app-network-resource-group ${RESOURCE_GROUP} --infra-resource-group ${WEBSERVICE_INFRA_RESOURCE_GROUP} \
+                        --app-subnet ${WEBSERVICE_SUBNET_NAME} --service-runtime-subnet ${WEBSERVICE_RUNTIME_SUBNET_NAME}"
+
     if [[ $ENABLE_APP_INSIGHTS == "true" ]]; then
         create_spring_inst="$create_spring_inst --app-insights $APP_INSIGHT_NAME --sampling-rate $APP_INSIGHT_SAMPLING_RATE"
+    else
+        create_spring_inst="$create_spring_inst --disable-app-insights true"
     fi
+
+    eval "$create_spring_inst"
+
+    if [ $? -ne 0 ]; then
+    logger "ERROR" "Failed to create Azure Spring Apps service"
+        exit 1
+    fi
+
+    logger "INFO" "Azure Spring Apps service created successfully: $SPRING_APPS_SERVICE"
+
 else
     logger "DEBUG" "Azure Spring Apps service $SPRING_APPS_SERVICE already exists"
 fi

@@ -187,7 +187,8 @@ check_and_create_subnet() {
         # Create the subnet if it is allowed
         if [[ "$ENABLE_SUBNET_CREATION" == "true" ]]; then
             echo "Subnet '$subnet_name' does not exist. Creating it..."
-            az network vnet subnet create --resource-group "$RESOURCE_GROUP" --vnet-name "$VNET_NAME" --address-prefixes "$subnet_prefix" --name "$subnet_name"
+            az network vnet subnet create --resource-group "$RESOURCE_GROUP" --vnet-name "$VNET_NAME" \
+            --address-prefixes "$subnet_prefix" --name "$subnet_name"
             if [[ $? -eq 0 ]]; then
                 echo "Subnet '$subnet_name' created successfully."
             else
@@ -199,3 +200,4 @@ check_and_create_subnet() {
         fi
     fi
 }
+

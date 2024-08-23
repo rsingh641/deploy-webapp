@@ -32,6 +32,7 @@ check_and_create_subnet $UI_SUBNET_NAME $UI_SUBNET_PREFIX
 
 logger "INFO" "Setting up Applications for [$ENV]"
 
+
 ./deploy-webservice-spring.sh
 
 
