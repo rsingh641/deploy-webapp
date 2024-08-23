@@ -201,3 +201,47 @@ check_and_create_subnet() {
     fi
 }
 
+# Function to download artifact using wget
+download_artifact() {
+    # check if local artifactory path exists
+    if [ ! -d "$LOCAL_ARTIFACT_DIR" ]; then
+        mkdir -p "$LOCAL_ARTIFACT_DIR"
+        if [ $? -ne 0 ]; then
+            logger "ERROR" "Failed to create local artifact directory"
+            exit 1
+        fi
+    fi
+
+    local webservice_package="${ARTIFACT_URL}/${SPRING_APP_PACKAGE_NAME}"
+    local ui_package="${ARTIFACT_URL}/${UI_PACKAGE_NAME}"
+
+    if [ ! -f "$LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME" ]; then
+        logger "INFO" "Downloading webservice package from URL: $webservice_package"
+        
+        wget -O "$LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME" $webservice_package
+
+        if [ $? -ne 0 ]; then
+            logger "ERROR" "Failed to download webservice artifact from URL"
+            exit 1
+        fi
+
+        logger "INFO" "Webservice artifact downloaded successfully to $LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME"
+
+    if [ ! -f "$LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME" ]; then
+        logger "INFO" "Downloading webservice package from URL: $ui_package"
+        
+        wget -O "$LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME" $ui_package
+
+        if [ $? -ne 0 ]; then
+            logger "ERROR" "Failed to download ui artifact from URL"
+            exit 1
+        fi
+
+        logger "INFO" "UI artifact downloaded successfully to $LOCAL_ARTIFACT_PATH"
+
+    else
+        logger "INFO" "UI artifact already downloaded: $LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME"
+    fi
+}
+
+

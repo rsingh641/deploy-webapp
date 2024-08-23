@@ -37,11 +37,12 @@ fi
 if ! az spring app show --name $SPRING_APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP &>/dev/null; then
     logger "INFO" "Creating Spring Boot app: $SPRING_APP_NAME"
     create_spring_app="az spring app create --name $SPRING_APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP \
-                        --runtime-version $JAVA_VERSION --assign-endpoint  true --assign-public-endpoint $SPRING_APP_PUBLIC_ENDPOINT \
+                        --runtime-version $SPRING_APP_RUNTIME_VERSION --assign-endpoint  true --assign-public-endpoint $SPRING_APP_PUBLIC_ENDPOINT \
                         --cpu $SPRING_APP_CPU --memory $SPRING_APP_MEMORY --instance-count $SPRING_APP_INSTANCE_COUNT \
-                        --deployment-name $SPRING_APP_DEPLOYMENT_NAME --disable-probe $SPRING_APP_DISABLE_PROBE \
-                        --enable-liveness-probe $SPRING_APP_ENABLE_LIVNESS_PROBE --enable-readiness-probe $SPRING_APP_ENABLE_READINESS_PROBE \
-                        --enable-startup-probe $SPRING_APP_ENABLE_STARTUP_PROBE --enable-persistent-storage true"
+                        --min-replicas $SPRING_APP_MIN_REPLICAS --max-replicas $SPRING_APP_MAX_REPLICAS --deployment-name $SPRING_APP_DEPLOYMENT_NAME \
+                        --disable-probe $SPRING_APP_DISABLE_PROBE --enable-liveness-probe $SPRING_APP_ENABLE_LIVNESS_PROBE \
+                        --enable-readiness-probe $SPRING_APP_ENABLE_READINESS_PROBE --enable-startup-probe $SPRING_APP_ENABLE_STARTUP_PROBE \
+                        --enable-persistent-storage true"
 
     eval "$create_spring_app"
 
@@ -53,6 +54,27 @@ if ! az spring app show --name $SPRING_APP_NAME --service $SPRING_APPS_SERVICE -
 else
     logger "DEBUG" "Spring Boot app $SPRING_APP_NAME already exists"
 fi
+
+# Deploy the Spring Boot application artifact
+logger "INFO" "Deploying Spring Boot application artifact to app: $SPRING_APP_NAME"
+
+# Deploy the artifact to Azure Spring Apps
+deploy_artifact="az spring app deploy --name $SPRING_APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP \
+                --artifact-url $ARTIFACT_URL --deployment-name $SPRING_APP_DEPLOYMENT_NAME --disable-probe $SPRING_APP_DISABLE_PROBE \
+                --grace-period $SPRING_APP_GRACE_PERIOD --jvm-options=$SPRING_APP_JAVA_OPTIONS' --language-framework "springboot" \
+                --runtime-version $SPRING_APP_RUNTIME_VERSION  
+"
+
+eval "$deploy_artifact"
+
+if [ $? -ne 0 ]; then
+    logger "ERROR" "Failed to deploy artifact to Spring Boot app: $SPRING_APP_NAME"
+    exit 1
+fi
+
+logger "INFO" "Artifact deployed successfully to Spring Boot app: $SPRING_APP_NAME"
+
+
 
 
 
