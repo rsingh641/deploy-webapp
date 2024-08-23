@@ -2,13 +2,6 @@
 
 set -e
 
-# Function to handle errors
-handle_error() {
-    echo "Error on line $1"
-    exit 1
-}
-trap 'handle_error $LINENO' ERR
-
 logger "INFO" "Deploying Webservice for [$ENV]"
 
 # Create App Service Plan

@@ -1,13 +1,9 @@
 #! /bin/bash
 
-set -e
+#Add a detailed explanation of what this script does as a comment here
 
-# Function to handle errors
-handle_error() {
-    echo "Error on line $1"
-    exit 1
-}
-trap 'handle_error $LINENO' ERR
+# Set error handling to exit the script immediately if a command fails
+set -e
 
 logger "INFO" "Deploying Webservice for [$ENV]"
 
@@ -26,7 +22,6 @@ if ! az spring app show --name $APP_NAME --service $SPRING_APPS_SERVICE --resour
 else
     echo "Spring Boot app $APP_NAME already exists"
 fi
-
 
 # Create App Service Plan
 logger "DEBUG" "Checking if App Service Plan '$APP_SERVICE_PLAN' exists..."

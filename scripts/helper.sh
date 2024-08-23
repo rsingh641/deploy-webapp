@@ -1,5 +1,14 @@
 #! /bin/bash
 
+set -e
+
+# Function to handle errors and print line number
+handle_error() {
+    echo "Error on line $1"
+    exit 1
+}
+trap 'handle_error $LINENO' ERR
+
 # Function to handle logging
 logger(){
     LEVEL=$1
