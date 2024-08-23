@@ -1,0 +1,11 @@
+creation_rules:
+  # upon creation of a file that matches the pattern *.enc.yaml,
+  # KMS set is used
+  - path_regex: .*/environments/dev/.*.enc.yaml$
+    azure-kv: https://spos-dev.vault.azure.net/keys/sops-key/krjtldskjlrldskj4lkjlkewj5l32k4jlk32j4lk8
+  - path_regex: .*/environments/test/.*.enc.yaml$
+    azure-kv: https://spos-test.vault.azure.net/keys/sops-key/krjtldskjlrldskj4lkjlkewj5l32k4jlk32j4lk8
+  - path_regex: .*/environments/prod/.*.enc.yaml$
+    azure-kv: https://spos-prod.vault.azure.net/keys/sops-key/krjtldskjlrldskj4lkjlkewj5l32k4jlk32j4lk8
+  - path_regex: .*/environments/dr/.*.enc.yaml$
+    azure-kv: https://spos-dr.vault.azure.net/keys/sops-key/krjtldskjlrldskj4lkjlkewj5l32k4jlk32j4lk8
