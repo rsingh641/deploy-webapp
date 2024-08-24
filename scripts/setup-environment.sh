@@ -21,8 +21,9 @@ check_and_create_subnet $UI_SUBNET_NAME $UI_SUBNET_PREFIX
 
 logger "INFO" "Setting up Applications for [$ENV]"
 
-
-./deploy-webservice-spring.sh
+logger "INFO" "Check and Create Webservice for [$ENV]"
+check_and_create_spring_service_instance
+check_and_create_spring_app_instance
 
 
 

@@ -3,8 +3,6 @@
 # Set error handling to exit the script immediately if a command fails
 set -e
 
-logger "INFO" "Deploying Webservice for [$ENV]"
-
 # Function to check and create sprint service instance
 check_and_create_spring_service_instance() {
     # Check if Azure Spring Apps service exists

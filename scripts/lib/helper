@@ -1,0 +1,126 @@
+#! /bin/bash
+
+set -e
+
+# Function to handle errors and print line number
+handle_error() {
+    echo "Error on line $1"
+    exit 1
+}
+trap 'handle_error $LINENO' ERR
+
+# Function to handle logging
+logger() {
+    LEVEL=$1
+    MESSAGE=$2
+    DATE_STRING=$(date)
+    TO_SHOW="false"
+    # LEVELS are INFO, DEBUG, ERROR
+    if [ "$LEVEL" == "INFO" ]; then COLOR=$GREEN && TO_SHOW="true"
+    elif ([ "$LEVEL" == "DEBUG" ] && [ "$DEBUG_ENABLED" == "true" ]); then COLOR=$BLUE && TO_SHOW="true" && MESSAGE="($DATE_STRING) $MESSAGE"
+    elif [ "$LEVEL" == "ERROR" ]; then COLOR=$RED && TO_SHOW="true"
+    fi
+    if [ "$TO_SHOW" == "true" ]; then echo -e "${COLOR}$LEVEL: $MESSAGE${NC}"; fi
+}
+
+# Function to fetch secrets from the encrypted file
+fetch_secrets() {
+    SECRETS_FILE=$1
+    FS=$'\37'
+    sops -d $SECRETS_FILE | while read line
+    do
+        if [ ${line:0:1} == "#" ]; then
+            continue
+        fi
+        key=$(echo $line | awk '{print $1}' | tr -d ':')
+        value=$(echo $line | sed 's/\"/\\"/g' | awk '{$1="";print}' | xargs echo -n)
+        # trim leading and trailing " in any property
+        value="${value#\"}"
+        value="${value%\"}"
+        export ${key}=${value}
+    done
+}
+
+replace_secrets() {
+    BUILD="$LOCAL_ARTIFACT_DIR"
+    FS=$'\37' # Using escape characters for sed delimiter
+
+    sops -d $SECRETS_FILE | while read line
+    do
+        if [ ${line:0:1} == "#" ]; then
+            continue
+        fi
+        key=$(echo $line | awk '{print $1}' | tr -d ':')
+        value=$(echo $line | sed 's/\"/\\"/g' | awk '{$1="";print}' | xargs echo -n)
+        # Below lines trims leading and trailing " in any property
+        value="${value#\"}"
+        value="${value%\"}"
+
+        # Define application properties file here for
+        find $SCRIPTS_ROOT_DIR -type f -name "*.*" -exec sed -i s${FS}"<${key}>"${FS}${value}${FS}g {} +
+
+    done
+}
+
+replace_properties() {
+    BUILD="$LOCAL_ARTIFACT_DIR"
+    FS=$'\37' # Using escape characters for sed delimiter
+    for line in $(cat  $PROPERTIES_FILE)
+    do
+        if [ ${line:0:1} == "#" ]; then
+            continue
+        fi
+        IFS== read -r key value <<< "$line"
+        if [ "$key" == "*URL" ]; then
+            value=${value//['\']/'\\\'}
+        fi
+
+        # Define application properties file here for
+        find $SCRIPTS_ROOT_DIR -type f -name "*.*" -exec sed -i s${FS}"<${key}>"${FS}${value}${FS}g {} +
+
+    done
+}
+
+# Function to download artifact using wget
+download_artifact() {
+    # check if local artifactory path exists
+    if [ ! -d "$LOCAL_ARTIFACT_DIR" ]; then
+        mkdir -p "$LOCAL_ARTIFACT_DIR"
+        if [ $? -ne 0 ]; then
+            logger "ERROR" "Failed to create local artifact directory"
+            exit 1
+        fi
+    fi
+
+    local webservice_package="${ARTIFACT_URL}/${SPRING_APP_PACKAGE_NAME}"
+    local ui_package="${ARTIFACT_URL}/${UI_PACKAGE_NAME}"
+
+    if [ ! -f "$LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME" ]; then
+        logger "INFO" "Downloading webservice package from URL: $webservice_package"
+        
+        wget -O "$LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME" $webservice_package
+
+        if [ $? -ne 0 ]; then
+            logger "ERROR" "Failed to download webservice artifact from URL"
+            exit 1
+        fi
+
+        logger "INFO" "Webservice artifact downloaded successfully to $LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME"
+
+    if [ ! -f "$LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME" ]; then
+        logger "INFO" "Downloading webservice package from URL: $ui_package"
+        
+        wget -O "$LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME" $ui_package
+
+        if [ $? -ne 0 ]; then
+            logger "ERROR" "Failed to download ui artifact from URL"
+            exit 1
+        fi
+
+        logger "INFO" "UI artifact downloaded successfully to $LOCAL_ARTIFACT_PATH"
+
+    else
+        logger "INFO" "UI artifact already downloaded: $LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME"
+    fi
+}
+
