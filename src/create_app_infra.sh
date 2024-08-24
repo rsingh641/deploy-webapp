@@ -33,19 +33,17 @@ logger "INFO" "Setting up application infrastucture for [$ENV]"
 
 logger "INFO" "Check and Create Spring Webservice for [$ENV]"
 check_and_create_spring_service_instance
+
+logger "INFO" "Check and Create Spring app instance for [$ENV]"
 check_and_create_spring_app_instance
 
-logger "INFO" "Check and Create UI Webapp for [$ENV]"
+logger "INFO" "Check and Create UI Webapp service plan for [$ENV]"
 check_and_create_app_service_plan
+
+logger "INFO" "Check and Create UI Webapp instance for [$ENV]"
 check_and_create_webapp
 
-logger "INFO" "Deploying Webservice artifacts to Spring app service instance"
-deploy_webservice_artifacts
-
-logger "INFO" "Deploying UI artifacts to Webapp service instance"
-deploy_ui_artifact
-
-logger "INFO" "Deployment completed successfully for [$ENV]"
+logger "INFO" "Application Infra creation completed successfully for [$ENV]"
 
 exit 0
 

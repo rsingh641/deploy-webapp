@@ -31,13 +31,3 @@ az_login
 
 logger "INFO" "Reading secrets from local encrypted file"
 fetch_secrets $SECRETS_FILE
-
-logger "INFO" "Downloading Build Artificats to local path: $LOCAL_ARTIFACT_DIR"
-download_artifact
-
-logger "INFO" "Replacing placeholders in app properties file with values from secrets file"
-replace_secrets
-
-logger "INFO" "Replacing placeholders in app properties file with values from properties file"
-replace_properties
-
