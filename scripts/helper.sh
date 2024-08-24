@@ -138,6 +138,52 @@ check_and_create_key_vault() {
     fi
 }
 
+# Function to fetch secrets from Azure Key Vault and export key=value pairs as environment variables
+load_secrets_from_keyvault() {
+    local keyvault_name=$KEYVAULT_NAME
+
+    if [ -z "$keyvault_name" ]; then
+        echo "ERROR: Key Vault name is required"
+        return 1
+    fi
+
+    echo "INFO: Fetching secrets from Key Vault: $keyvault_name"
+
+    # List all secret names in the Key Vault
+    secret_names=$(az keyvault secret list --vault-name "$keyvault_name" --query "[].name" -o tsv)
+
+    if [ -z "$secret_names" ]; then
+        echo "INFO: No secrets found in Key Vault: $keyvault_name"
+        return 0
+    fi
+
+    # Iterate over each secret
+    for secret_name in $secret_names; do
+        # Fetch the secret value
+        secret_value=$(az keyvault secret show --vault-name "$keyvault_name" --name "$secret_name" --query "value" -o tsv)
+
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Failed to retrieve secret: $secret_name"
+            return 1
+        fi
+
+        # Split the secret_value into individual key=value pairs and export each as an environment variable
+        while IFS= read -r line; do
+            # Ignore empty lines and lines starting with '#'
+            if [[ -n "$line" && ! "$line" =~ ^# ]]; then
+                key=$(echo "$line" | cut -d '=' -f 1)
+                value=$(echo "$line" | cut -d '=' -f 2-)
+
+                # Export the key=value as an environment variable
+                export "$key=$value"
+                echo "INFO: Loaded environment variable: $key"
+            fi
+        done <<< "$secret_value"
+    done
+
+    echo "INFO: All secrets have been loaded successfully"
+}
+
 # Function to upload DB2 certificate to Key Vault
 upload_db2_cert_to_key_vault() {
     logger "INFO" "Uploading DB2 certificate to Key Vault..."
@@ -148,20 +194,22 @@ upload_db2_cert_to_key_vault() {
     fi
 }
 
-# Function to store Oracle credentials in Key Vault
+# Function to store Oracle credentials in Key Vault as a secret
 store_oracle_creds_in_key_vault() {
-    logger "INFO" "Storing Oracle credentials in Key Vault..."
-    az keyvault secret set --vault-name $KEY_VAULT_NAME --name $ORACLE_USERNAME_SECRET_NAME --value $ORACLE_USERNAME
+    logger "INFO" "Storing Oracle credentials in Key Vault as a secret..."
+
+    # Prepare the secret value as key=value pairs separated by newlines
+    oracle_secret_value="ORACLE_USERNAME=$ORACLE_USERNAME\nORACLE_PASSWORD=$ORACLE_PASSWORD"
+
+    # Store the combined secret in Key Vault
+    az keyvault secret set --vault-name "$KEYVAULT_NAME" --name "$ORACLE_SECRET_NAME" --value "$oracle_secret_value"
+    
     if [ $? -ne 0 ]; then
-        logger "ERROR" "Failed to store Oracle username in Key Vault"
+        logger "ERROR" "Failed to store Oracle credentials in Key Vault $KEYVAULT_NAME"
         exit 1
     fi
 
-    az keyvault secret set --vault-name $KEY_VAULT_NAME --name $ORACLE_PASSWORD_SECRET_NAME --value $ORACLE_PASSWORD
-    if [ $? -ne 0 ]; then
-        logger "ERROR" "Failed to store Oracle password in Key Vault"
-        exit 1
-    fi
+    logger "INFO" "Oracle credentials successfully stored in Key Vault $KEYVAULT_NAME"
 }
 
 # Install Azure CLI
@@ -490,3 +538,4 @@ add_storage_to_spring_app() {
 
     echo "INFO: Storage account $storage_account_name added to Spring App $spring_app_name successfully."
 }
+
