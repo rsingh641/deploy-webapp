@@ -25,6 +25,7 @@ create_storage_account_and_store_in_keyvault
 check_and_create_app_insights
 
 # checking if required subnets exist, if not create them
+# We are using seperate subnets for webservice, ui and webservice runtime
 check_and_create_subnet $WEBSERVICE_SUBNET_NAME $WEBSERVICE_SUBNET_PREFIX
 check_and_create_subnet $WEBSERVICE_RUNTIME_SUBNET_NAME $WEBSERVICE_RUNTIME_SUBNET_PREFIX
 check_and_create_subnet $UI_SUBNET_NAME $UI_SUBNET_PREFIX
