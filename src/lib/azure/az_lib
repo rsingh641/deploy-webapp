@@ -174,3 +174,25 @@ create_storage_account_and_store_in_keyvault() {
     echo "INFO: Storage account credentials stored in Key Vault successfully."
 }
 
+# Function to check and create a resource group if it doesn't already exist
+check_and_create_resource_group() {
+    local RESOURCE_GROUP_NAME=$1
+
+    if [ -z "$RESOURCE_GROUP_NAME" ] || [ -z "$LOCATION" ]; then
+        logger "ERROR" "Resource group name and location are required"
+        exit 1
+    fi
+
+    # Check if the resource group already exists
+    if az group show --name "$RESOURCE_GROUP_NAME" > /dev/null 2>&1; then
+        logger "INFO" "Resource group '$RESOURCE_GROUP_NAME' already exists"
+    else
+        logger "INFO" "Creating resource group '$RESOURCE_GROUP_NAME' in location '$LOCATION'"
+        if az group create --name "$RESOURCE_GROUP_NAME" --location "$LOCATION" > /dev/null 2>&1; then
+            logger "INFO" "Resource group '$RESOURCE_GROUP_NAME' created successfully"
+        else
+            logger "ERROR" "Failed to create resource group '$RESOURCE_GROUP_NAME'"
+            exit 1
+        fi
+    fi
+}

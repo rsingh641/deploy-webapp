@@ -3,15 +3,18 @@
 set -e
 
 # Initialise the local environment
-source initialize
+source lib/initialize
 
 # check if keyvault exists, if not create it
 check_and_create_key_vault
 
-# check if storage account exists
+# check if storage account exists if not create it
+# and add its access key to the keyvault
 create_storage_account_and_store_in_keyvault
 
-# check if app_insights is deployed
+# check if app_insights is enabled for the environment 
+# if yes then check app-insight instance is deployed
+# if not the create it
 check_and_create_app_insights
 
 # checking if required subnets exist, if not create them

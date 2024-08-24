@@ -9,6 +9,7 @@ PROPERTIES_FILE="config/environments/${ENV}/${ENV}.properties"
 
 source ${PROPERTIES_FILE}
 source helper
+source azure/az_lib
 
 check_az_cli
 

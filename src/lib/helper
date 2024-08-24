@@ -30,6 +30,8 @@ logger() {
 }
 
 # Function to fetch secrets from the encrypted file
+# Decrypt the file using sops key stored in Azure keyvault
+# and export to environment variable
 fetch_secrets() {
     SECRETS_FILE=$1
     FS=$'\37'
@@ -47,6 +49,12 @@ fetch_secrets() {
     done
 }
 
+# Function to replace placeholder variables in application variables 
+# with their corresponding Environment specific value
+# Sensitive variables are kept in encrypted file in repository
+# and are decrypted at runtime
+# <TEMP_VARIABLE> -- This comes in application properties file build artifacts 
+# and is replaced with its environment specific value
 replace_secrets() {
     BUILD="$LOCAL_ARTIFACT_DIR"
     FS=$'\37' # Using escape characters for sed delimiter
@@ -68,6 +76,8 @@ replace_secrets() {
     done
 }
 
+# Function to replace placeholder variables in application variables 
+# with their corresponding Environment specific value
 replace_properties() {
     BUILD="$LOCAL_ARTIFACT_DIR"
     FS=$'\37' # Using escape characters for sed delimiter
@@ -87,7 +97,7 @@ replace_properties() {
     done
 }
 
-# Function to delete a local file 
+# Function to delete a local file and handle failure
 delete_file() {
     rm -f $1
     if [ $? -ne 0 ]; then
@@ -96,6 +106,7 @@ delete_file() {
 }
 
 # Function to download artifact using wget
+# Downloads webservice and ui packages from build artifacts url
 download_artifact() {
     # check if local artifactory path exists
     if [ ! -d "$LOCAL_ARTIFACT_DIR" ]; then
