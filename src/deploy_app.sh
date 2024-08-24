@@ -18,4 +18,3 @@ deploy_webservice_artifacts
 
 logger "INFO" "Deploying UI artifacts to Webapp service instance"
 deploy_ui_artifact
-

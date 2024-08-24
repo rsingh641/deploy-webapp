@@ -57,9 +57,9 @@ check_and_create_webapp() {
     local role=$WEBAPP_ROLE
     local runtime=$WEBAPP_RUNTIME
     local startup_file=$WEBAPP_STARTUP_FILE
-    local subnet=$WEBAPP_SUBNET_NAME
+    local subnet=$WEBSERVICE_SUBNET_NAME
     local tags=$WEBAPP_TAGS
-    local vnet=$WEBAPP_VNET
+    local vnet=$VNET_NAME
 
     logger "INFO" "Checking if Web App '$app_name' exists in resource group '$resource_group'..."
 
@@ -95,4 +95,3 @@ check_and_create_webapp() {
         logger "INFO" "Successfully created Web App '$app_name'."
     fi
 }
-

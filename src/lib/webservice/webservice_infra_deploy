@@ -59,3 +59,24 @@ check_and_create_spring_app_instance() {
     fi
 }
 
+# Function to Integrate Azure Web App with VNet
+integrate_webapp_with_vnet() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local subnet=$WEBSERVICE_SUBNET_NAME
+    local vnet=$VNET_NAME
+
+    logger "INFO" "Integrating Web App $webapp_name with VNet Subnet $subnet_id..."
+    az webapp vnet-integration add --name $webapp_name \
+                                   --resource-group $resource_group \
+                                   --subnet $subnet \
+                                   --vnet $vnet
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to integrate Web App $webapp_name with VNet Subnet $subnet_id."
+        exit 1
+    fi
+
+    logger "INFO" "Successfully integrated Web App $webapp_name with VNet Subnet $subnet_id."
+}
+
