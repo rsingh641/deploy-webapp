@@ -6,7 +6,6 @@ if [ -z $ENV ]; then ENV=$APP_ENVIRONMENT; fi
 SECRETS_FILE="config/environments/${ENV}/secrets.enc.yaml"
 
 PROPERTIES_FILE="config/environments/${ENV}/${ENV}.properties"
-helper_lib="./helper"
 
 source ${PROPERTIES_FILE}
 source src/lib/helper
