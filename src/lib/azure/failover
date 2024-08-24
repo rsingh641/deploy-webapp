@@ -1,0 +1,80 @@
+#! /bin/bash
+
+set -e
+
+# This file contains functions to trigger failover
+# seperate clear named functions are used to aviod 
+# any confusion at execution time
+
+# Function to switch traffic from Production to DR
+switch_traffic_to_dr() {
+    local traffic_manager_profile=$TRAFFIC_MANAGER_PROFILE
+    local resource_group=$TRAFFIC_MANAGER_RESOURCE_GROUP
+    local prod_endpoint=$TRAFFIC_MANAGER_PROD_ENDPOINT_NAME
+    local dr_endpoint=$TRAFFIC_MANAGER_DR_ENDPOINT_NAME
+
+    logger "INFO" "Switching traffic from Production to DR..."
+
+    # Update production endpoint to lower priority (standby)
+    az trafficmanager endpoint update \
+        --name "$prod_endpoint" \
+        --profile-name "$traffic_manager_profile" \
+        --resource-group "$resource_group" \
+        --priority 2
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update priority for Production endpoint"
+        exit 1
+    fi
+
+    # Update DR endpoint to higher priority (active)
+    az trafficmanager endpoint update \
+        --name "$dr_endpoint" \
+        --profile-name "$traffic_manager_profile" \
+        --resource-group "$resource_group" \
+        --priority 1
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update priority for DR endpoint"
+        exit 1
+    fi
+
+    logger "INFO" "Successfully switched traffic to DR."
+}
+
+# Function to switch traffic from DR to Production
+switch_traffic_to_prod() {
+    local traffic_manager_profile=$TRAFFIC_MANAGER_PROFILE
+    local resource_group=$TRAFFIC_MANAGER_RESOURCE_GROUP
+    local prod_endpoint=$TRAFFIC_MANAGER_PROD_ENDPOINT_NAME
+    local dr_endpoint=$TRAFFIC_MANAGER_DR_ENDPOINT_NAME
+
+    logger "INFO" "Switching traffic from DR to Production..."
+
+    # Update DR endpoint to lower priority (standby)
+    az trafficmanager endpoint update \
+        --name "$dr_endpoint" \
+        --profile-name "$traffic_manager_profile" \
+        --resource-group "$resource_group" \
+        --priority 2
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update priority for DR endpoint"
+        exit 1
+    fi
+
+    # Update production endpoint to higher priority (active)
+    az trafficmanager endpoint update \
+        --name "$prod_endpoint" \
+        --profile-name "$traffic_manager_profile" \
+        --resource-group "$resource_group" \
+        --priority 1
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update priority for Production endpoint"
+        exit 1
+    fi
+
+    logger "INFO" "Successfully switched traffic to Production."
+}
+

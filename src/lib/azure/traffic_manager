@@ -6,7 +6,7 @@ set -e
 # Function to create traffic 
 create_traffic_manager_profile() {
     local profile_name=$TRAFFIC_MANAGER_PROFILE
-    local resource_group=$RESOURCE_GROUP
+    local resource_group=$TRAFFIC_MANAGER_RESOURCE_GROUP
     local routing_method=$TRAFFIC_MANAGER_ROUTING_METHOD
     local unique_dns_name=$TRAFFIC_MANAGER_UNIQUE_DNS
     local ttl=$TRAFFIC_MANAGER_PROFILE_TTL
