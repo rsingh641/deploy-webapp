@@ -1,3 +1,33 @@
 #! /bin/bash
 
 set -e
+
+# Function to update an existing App Service Plan
+update_app_service_plan() {
+    local plan_name=$APP_SERVICE_PLAN_NAME
+    local resource_group=$RESOURCE_GROUP
+    local elastic_scale=$APP_SERVICE_PLAN_ELASTIC_SCALE
+    local max_elastic_worker_count=$APP_SERVICE_PLAN_MAX_ELASTIC_WORKER_COUNT
+    local no_wait=$APP_SERVICE_PLAN_NO_WAIT
+    local number_of_workers=$APP_SERVICE_PLAN_NUMBER_OF_WORKERS
+
+    echo "INFO: Updating App Service Plan '$plan_name' in resource group '$resource_group'..."
+
+    # Update the App Service Plan
+    az appservice plan update \
+        --name "$plan_name" \
+        --resource-group "$resource_group" \
+        --elastic-scale "$elastic_scale" \
+        --max-elastic-worker-count "$max_elastic_worker_count" \
+        --no-wait "$no_wait" \
+        --number-of-workers "$number_of_workers" \
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to update App Service Plan '$plan_name'."
+        exit 1
+    fi
+
+    echo "INFO: Successfully updated App Service Plan '$plan_name'."
+}
+
+

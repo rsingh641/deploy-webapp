@@ -106,7 +106,7 @@ download_artifact() {
     fi
 
     local webservice_package="${ARTIFACT_URL}/${SPRING_APP_PACKAGE_NAME}"
-    local ui_package="${ARTIFACT_URL}/${UI_PACKAGE_NAME}"
+    local ui_package="${ARTIFACT_URL}/${WEBAPP_PACKAGE_NAME}"
 
     if [ ! -f "$LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME" ]; then
         logger "INFO" "Downloading webservice package from URL: $webservice_package"
@@ -120,10 +120,10 @@ download_artifact() {
 
         logger "INFO" "Webservice artifact downloaded successfully to $LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME"
 
-    if [ ! -f "$LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME" ]; then
+    if [ ! -f "$LOCAL_ARTIFACT_DIR/$WEBAPP_PACKAGE_NAME" ]; then
         logger "INFO" "Downloading webservice package from URL: $ui_package"
         
-        wget -O "$LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME" $ui_package
+        wget -O "$LOCAL_ARTIFACT_DIR/$WEBAPP_PACKAGE_NAME" $ui_package
 
         if [ $? -ne 0 ]; then
             logger "ERROR" "Failed to download ui artifact from URL"
@@ -133,7 +133,7 @@ download_artifact() {
         logger "INFO" "UI artifact downloaded successfully to $LOCAL_ARTIFACT_PATH"
 
     else
-        logger "INFO" "UI artifact already downloaded: $LOCAL_ARTIFACT_DIR/$UI_PACKAGE_NAME"
+        logger "INFO" "UI artifact already downloaded: $LOCAL_ARTIFACT_DIR/$WEBAPP_PACKAGE_NAME"
     fi
 }
 
