@@ -7,6 +7,7 @@ handle_error() {
     echo "Error on line $1"
     exit 1
 }
+
 trap 'handle_error $LINENO' ERR
 
 # Function to handle logging
@@ -119,6 +120,7 @@ download_artifact() {
         fi
 
         logger "INFO" "Webservice artifact downloaded successfully to $LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME"
+    fi
 
     if [ ! -f "$LOCAL_ARTIFACT_DIR/$WEBAPP_PACKAGE_NAME" ]; then
         logger "INFO" "Downloading webservice package from URL: $ui_package"
@@ -136,4 +138,3 @@ download_artifact() {
         logger "INFO" "UI artifact already downloaded: $LOCAL_ARTIFACT_DIR/$WEBAPP_PACKAGE_NAME"
     fi
 }
-

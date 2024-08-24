@@ -7,16 +7,20 @@ ENV=$1
 
 set -e
 
-source helper.sh
+source src/lib/helper
 
-ENV_DIR="../config/environments/${ENV}"
+ENVIRONMENTS_DIR="config/environments"
+ENV_TEMPLATE_DIR="config/template/environment/env_name"
+
+ENV_DIR="${ENVIRONMENTS_DIR}/${ENV}"
+
 logger "INFO" "Checking if environment configuration exists"
 if [ -d "${ENV_DIR}" ]; then
   logger "ERROR" "Environment config directory already exist: ${ENV_DIR}"
   exit 1
 fi
 
-mkdir -p "${ENV_DIR}"
+cp -r "${ENV_TEMPLATE_DIR}" "${ENVIRONMENTS_DIR}/${ENV}"
 
 if [ $? -ne 0 ]; then
   logger "ERROR" "Failed to create environment config directory: ${ENV_DIR}"
@@ -25,74 +29,23 @@ fi
 
 logger "INFO" "Generating environment configuration files"
 
-logger "INFO" "Creating file ${ENV}.properties"
+new_env_dir="${ENVIRONMENTS_DIR}/${ENV}"
 
-cat << EOF > "${ENV_DIR}/${ENV}.properties"
-# Environment configs
-ENV="${ENV}"
-LOCATION=""
-RESOURCE_GROUP="rg-\${ENV}"
-VNET="vnet-\${ENV}"
-KEY_VAULT_NAME="kv-\${ENV}"
+mv "${new_env_dir}"/env.properties            "${new_env_dir}"/${ENV}.properties
+mv "${new_env_dir}"/env.secrets.enc.yaml      "${new_env_dir}"/${ENV}.secrets.enc.yaml
+mv "${new_env_dir}"/env.ui.properties         "${new_env_dir}"/${ENV}.ui.properties
+mv "${new_env_dir}"/env.webservice.properties "${new_env_dir}"/${ENV}.webservice.properties
 
-#------------------------------
-# Webapp configs
-
-SPRING_APPS_SERVICE="spring-apps-\${ENV}"
-APP_SERVICE_PLAN="app_service_\${ENV}"
-SKU="B1"
-WEBAPP_NAME="webservice_\${ENV}"
-JAVA_VERSION=""
-JAVA_RUNTIME=""
-NODE_VERSION="14.0"
-
-#----------------------------------
-# Artifact configs
-
-ARTIFACT_FEED_NAME="ArtifactFeed_\${ENV}"
-ARTIFACT_PACKAGE_NAME="AppPackage_\${ENV}"
-ARTIFACT_VERSION="1.0.0"
-ARTIFACT_URL="https://pkgs.\${ENV}.azure.com/\${ORG_NAME}/\${PROJECT_NAME}/_artifacts/feed/\${ARTIFACT_FEED_NAME}"
-EOF
-
-# check if file is created and it has data
-if [ ! -s "${ENV_DIR}/${ENV}.properties" ]; then
-  logger "ERROR" "Failed to create ${ENV}.properties file"
-  exit 1
-fi
-
-logger "INFO" "Creating file ${ENV}.secrets.enc.yaml"
-
-cat << EOF > "${ENV_DIR}/${ENV}.secrets.enc.yaml"
-KEYVAULT_NAME: kv-${ENV}
-TENANT_ID: 
-APP_HOSTNAME: "${ENV}.webapp"
-DEPLOYMENT_USER: "${ENV}_deployment_user"
-DEPLOYMENT_PASSWORD: "${ENV}_deployment_password"
-
-DB2_DRIVER_CLASS_NAME: "com.ibm.db2.jcc.DB2Driver"
-DB2_HOSTNAME: "10.0.0.1"
-DB2_PORT: 50000
-DB2_DEFAULT_DB_NAME: "SAMPLE"
-
-ORACLE_DRIVER_CLASS_NAME: "oracle.jdbc.OracleDriver"
-ORACLE_HOSTNAME: "10.0.1.1"
-ORACLE_PORT: 1521
-ORACLE_SERVICE_NAME: "orclpdb1"
-ORACLE_USERNAME: "admin"
-ORACLE_PASSWORD: "Password"
-EOF
-
-# check if file is created and it has data
-if [ ! -s "${ENV_DIR}/${ENV}.secrets.enc.yaml" ]; then
-  logger "ERROR" "Failed to create ${ENV}.secrets.enc.yaml file"
-  exit 1
-fi
+# Replace "<env>" with $ENV in ${ENV}.ui.properties file
+sed -i "s/<env>/$ENV/g" "${new_env_dir}/${ENV}.secrets.enc.yaml"
 
 logger "INFO" "Adding path regex and sample azure-kv in sops file"
+logger "INFO" "Please create new sops key for ${ENV} environment in azure keyvault and update sops file"
 
 cat << EOF >> "../.sops.yaml"
-  - path_regex: .*/environments/${ENV}/.*.enc.yaml$
+  - path_regex: .*/config/environments/${ENV}/.*.enc.yaml$
     azure-kv: https://spos-${ENV}.vault.azure.net/keys/sops-key/env_sops_key
 EOF
+
+logger "INFO" "Successfully created new environment [${ENV}] configuration"
 
