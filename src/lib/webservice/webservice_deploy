@@ -48,6 +48,7 @@ update_webservice_artifacts() {
 
 
 
+
 # Create App Service Plan
 logger "DEBUG" "Checking if App Service Plan '$APP_SERVICE_PLAN' exists..."
 if ! az appservice plan show --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP > /dev/null 2>&1; then

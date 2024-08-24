@@ -1,5 +1,46 @@
 #! /bin/bash
 
+# Function to inject environment variables into a Spring Boot app
+set_spring_app_env_vars() {
+    local spring_app_name=$SPRING_APP_NAME
+    local resource_group=$RESOURCE_GROUP
+    local spring_service_name=$SPRING_APP_SERVICE_NAME
+    shift 3
+    local env_vars=("$@")
+
+    logger "INFO" "Injecting environment variables into Spring Boot application $spring_app_name..."
+
+    az spring app env var set --name "$spring_app_name" --resource-group "$resource_group" --service "$spring_service_name" "${env_vars[@]}"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to inject environment variables into Spring Boot application $spring_app_name"
+        exit 1
+    fi
+
+    logger "INFO" "Successfully injected environment variables into Spring Boot application $spring_app_name."
+}
+
+# Main function to fetch DB2 certificates from Keyvault and provide them to the Spring webservice app
+fetch_and_provide_db2_certs() {
+    local key_vault_name=$KEYVAULT_NAME
+    local spring_app_name=$SPRING_APP_NAME
+    local resource_group=$RESOURCE_GROUP
+    local spring_service_name=$SPRING_SERVICE_NAME
+    local db2_client_cert_name=$DB2_CLIENT_CERT_NAME
+    local db2_client_key_name=$DB2_CLIENT_KEY_NAME
+    local db2_ca_cert_name=$DB2_CA_CERT_NAME
+
+    # Fetch DB2 certificates from Key Vault
+    local db2_client_cert db2_client_key db2_ca_cert
+    db2_client_cert=$(fetch_secret_from_keyvault "$key_vault_name" "$db2_client_cert_name")
+    db2_client_key=$(fetch_secret_from_keyvault "$key_vault_name" "$db2_client_key_name")
+    db2_ca_cert=$(fetch_secret_from_keyvault "$key_vault_name" "$db2_ca_cert_name")
+
+    # Injecting certificates into Spring Boot application as environment variables
+    set_spring_app_env_vars "$spring_app_name" "$resource_group" "$spring_service_name" \
+        "DB2_CLIENT_CERT=$db2_client_cert" "DB2_CLIENT_KEY=$db2_client_key" "DB2_CA_CERT=$db2_ca_cert"
+}
+
 # Function for scaling webservice
 scale_spring_app() {
     logger "INFO" "Scaling Spring Boot Application..."
@@ -149,4 +190,61 @@ add_storage_to_spring_app() {
     echo "INFO: Storage account $storage_account_name added to Spring App $spring_app_name successfully."
 }
 
+# Function to update a Spring Boot app with environment variables
+update_spring_app() {
+    local app_name="${SPRING_APP_NAME}"
+    local resource_group="${RESOURCE_GROUP}"
+    local service_name="${SPRING_APP_SERVICE_NAME}"
+
+    logger "INFO" "Updating Spring Boot application: $app_name"
+
+    # Build the az command with parameters from environment variables
+    local az_command="az spring app update --name \"$app_name\" --resource-group \"$resource_group\" --service \"$service_name\""
+
+    # Append optional parameters if they are set
+    [ -n "$SPRING_APP_ASSIGN_ENDPOINT" ] && az_command+=" --assign-endpoint $SPRING_APP_ASSIGN_ENDPOINT"
+    [ -n "$SPRING_APP_ASSIGN_PUBLIC_ENDPOINT" ] && az_command+=" --assign-public-endpoint $SPRING_APP_ASSIGN_PUBLIC_ENDPOINT"
+    [ -n "$SPRING_APP_BACKEND_PROTOCOL" ] && az_command+=" --backend-protocol $SPRING_APP_BACKEND_PROTOCOL"
+    [ -n "$SPRING_APP_CLIENT_AUTH_CERTS" ] && az_command+=" --client-auth-certs $SPRING_APP_CLIENT_AUTH_CERTS"
+    [ -n "$SPRING_APP_CONFIG_FILE_PATTERNS" ] && az_command+=" --config-file-patterns $SPRING_APP_CONFIG_FILE_PATTERNS"
+    [ -n "$SPRING_APP_CUSTOM_ACTUATOR_PATH" ] && az_command+=" --custom-actuator-path $SPRING_APP_CUSTOM_ACTUATOR_PATH"
+    [ -n "$SPRING_APP_CUSTOM_ACTUATOR_PORT" ] && az_command+=" --custom-actuator-port $SPRING_APP_CUSTOM_ACTUATOR_PORT"
+    [ -n "$SPRING_APP_DEPLOYMENT" ] && az_command+=" --deployment $SPRING_APP_DEPLOYMENT"
+    [ -n "$SPRING_APP_DISABLE_PROBE" ] && az_command+=" --disable-probe $SPRING_APP_DISABLE_PROBE"
+    [ -n "$SPRING_APP_DISABLE_TEA" ] && az_command+=" --disable-tea $SPRING_APP_DISABLE_TEA"
+    [ -n "$SPRING_APP_ENABLE_INGRESS_TO_APP_TLS" ] && az_command+=" --enable-ingress-to-app-tls $SPRING_APP_ENABLE_INGRESS_TO_APP_TLS"
+    [ -n "$SPRING_APP_ENABLE_LIVENESS_PROBE" ] && az_command+=" --enable-liveness-probe $SPRING_APP_ENABLE_LIVENESS_PROBE"
+    [ -n "$SPRING_APP_ENABLE_PERSISTENT_STORAGE" ] && az_command+=" --enable-persistent-storage $SPRING_APP_ENABLE_PERSISTENT_STORAGE"
+    [ -n "$SPRING_APP_ENABLE_READINESS_PROBE" ] && az_command+=" --enable-readiness-probe $SPRING_APP_ENABLE_READINESS_PROBE"
+    [ -n "$SPRING_APP_ENABLE_STARTUP_PROBE" ] && az_command+=" --enable-startup-probe $SPRING_APP_ENABLE_STARTUP_PROBE"
+    [ -n "$SPRING_APP_ENV" ] && az_command+=" --env $SPRING_APP_ENV"
+    [ -n "$SPRING_APP_GRACE_PERIOD" ] && az_command+=" --grace-period $SPRING_APP_GRACE_PERIOD"
+    [ -n "$SPRING_APP_HTTPS_ONLY" ] && az_command+=" --https-only $SPRING_APP_HTTPS_ONLY"
+    [ -n "$SPRING_APP_INGRESS_READ_TIMEOUT" ] && az_command+=" --ingress-read-timeout $SPRING_APP_INGRESS_READ_TIMEOUT"
+    [ -n "$SPRING_APP_INGRESS_SEND_TIMEOUT" ] && az_command+=" --ingress-send-timeout $SPRING_APP_INGRESS_SEND_TIMEOUT"
+    [ -n "$SPRING_APP_JVM_OPTIONS" ] && az_command+=" --jvm-options $SPRING_APP_JVM_OPTIONS"
+    [ -n "$SPRING_APP_LIVENESS_PROBE_CONFIG" ] && az_command+=" --liveness-probe-config $SPRING_APP_LIVENESS_PROBE_CONFIG"
+    [ -n "$SPRING_APP_LOADED_PUBLIC_CERTIFICATE_FILE" ] && az_command+=" --loaded-public-certificate-file $SPRING_APP_LOADED_PUBLIC_CERTIFICATE_FILE"
+    [ -n "$SPRING_APP_MAIN_ENTRY" ] && az_command+=" --main-entry $SPRING_APP_MAIN_ENTRY"
+    [ -n "$SPRING_APP_NO_WAIT" ] && az_command+=" --no-wait"
+    [ -n "$SPRING_APP_PERSISTENT_STORAGE" ] && az_command+=" --persistent-storage $SPRING_APP_PERSISTENT_STORAGE"
+    [ -n "$SPRING_APP_READINESS_PROBE_CONFIG" ] && az_command+=" --readiness-probe-config $SPRING_APP_READINESS_PROBE_CONFIG"
+    [ -n "$SPRING_APP_RUNTIME_VERSION" ] && az_command+=" --runtime-version $SPRING_APP_RUNTIME_VERSION"
+    [ -n "$SPRING_APP_SECRETS" ] && az_command+=" --secrets $SPRING_APP_SECRETS"
+    [ -n "$SPRING_APP_SESSION_AFFINITY" ] && az_command+=" --session-affinity $SPRING_APP_SESSION_AFFINITY"
+    [ -n "$SPRING_APP_SESSION_MAX_AGE" ] && az_command+=" --session-max-age $SPRING_APP_SESSION_MAX_AGE"
+    [ -n "$SPRING_APP_STARTUP_PROBE_CONFIG" ] && az_command+=" --startup-probe-config $SPRING_APP_STARTUP_PROBE_CONFIG"
+    [ -n "$SPRING_APP_WORKLOAD_PROFILE" ] && az_command+=" --workload-profile $SPRING_APP_WORKLOAD_PROFILE"
+
+    # Execute the command
+    logger "INFO" "Executing command: $az_command"
+    eval $az_command
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update Spring Boot application: $app_name"
+        exit 1
+    fi
+
+    logger "INFO" "Successfully updated Spring Boot application: $app_name"
+}
 

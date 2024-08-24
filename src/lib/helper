@@ -16,11 +16,16 @@ logger() {
     DATE_STRING=$(date)
     TO_SHOW="false"
     # LEVELS are INFO, DEBUG, ERROR
-    if [ "$LEVEL" == "INFO" ]; then COLOR=$GREEN && TO_SHOW="true"
-    elif ([ "$LEVEL" == "DEBUG" ] && [ "$DEBUG_ENABLED" == "true" ]); then COLOR=$BLUE && TO_SHOW="true" && MESSAGE="($DATE_STRING) $MESSAGE"
-    elif [ "$LEVEL" == "ERROR" ]; then COLOR=$RED && TO_SHOW="true"
+    if [ "$LEVEL" == "INFO" ]; then 
+        COLOR=$GREEN && TO_SHOW="true"
+    elif ([ "$LEVEL" == "DEBUG" ] && [ "$DEBUG_ENABLED" == "true" ]); then 
+        COLOR=$BLUE && TO_SHOW="true" && MESSAGE="($DATE_STRING) $MESSAGE"
+    elif [ "$LEVEL" == "ERROR" ]; then 
+        COLOR=$RED && TO_SHOW="true"
     fi
-    if [ "$TO_SHOW" == "true" ]; then echo -e "${COLOR}$LEVEL: $MESSAGE${NC}"; fi
+    if [ "$TO_SHOW" == "true" ]; then 
+        echo -e "${COLOR}$LEVEL: $MESSAGE${NC}";
+    fi
 }
 
 # Function to fetch secrets from the encrypted file
@@ -79,6 +84,14 @@ replace_properties() {
         find $SCRIPTS_ROOT_DIR -type f -name "*.*" -exec sed -i s${FS}"<${key}>"${FS}${value}${FS}g {} +
 
     done
+}
+
+# Function to delete a local file 
+delete_file() {
+    rm -f $1
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed in deleting file $1"
+    fi
 }
 
 # Function to download artifact using wget

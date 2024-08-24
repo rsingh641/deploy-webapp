@@ -8,7 +8,7 @@ SECRETS_FILE="config/environments/${ENV}/secrets.enc.yaml"
 PROPERTIES_FILE="config/environments/${ENV}/${ENV}.properties"
 
 source ${PROPERTIES_FILE}
-source helper.sh
+source helper
 
 check_az_cli
 
