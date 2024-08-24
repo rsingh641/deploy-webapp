@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 # Function to inject environment variables into a Spring Boot app
 set_spring_app_env_vars() {
     local spring_app_name=$SPRING_APP_NAME

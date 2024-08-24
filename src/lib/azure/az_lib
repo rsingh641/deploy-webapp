@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 # Function to login to Azure
 az_login() {
     # Check if the required environment variables are set
@@ -52,12 +54,14 @@ install_azure_cli() {
 # Check and install Azure CLI
 check_az_cli() {
     logger "INFO" "Checking if Azure CLI is installed..."
-    if [ ! command -v az &> /dev/null ]; then
+    if ! command -v az &> /dev/null; then
         install_azure_cli
     fi
+
     az version
+
     if [ $? -ne 0 ]; then
-    logger "ERROR" "Failed to check Azure CLI version"
+        logger "ERROR" "Failed to check Azure CLI version"
         exit 1
     fi
     logger "INFO" "Azure CLI is installed."

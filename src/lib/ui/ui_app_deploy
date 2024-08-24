@@ -11,9 +11,9 @@ deploy_ui_artifact() {
     local deployment_timeout=$WEBAPP_DEPLOYMENT_TIMEOUT
 
     # Check if all required parameters are provided
-    if [[ -z "$resource_group" || -z "$webapp_name" || -z "$artifact_path" ]]; then
+    if [[ -z "$webapp_name" || -z "$artifact_path" ]]; then
         logger "ERROR" "Missing required Environment values."
-        echo "please check to insure <resource_group> <webapp_name> <artifact_path> are defined"
+        echo "please check to insure <webapp_name> <artifact_path> are defined"
         return 1
     fi
 

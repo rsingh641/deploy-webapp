@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Define colors for terminal logging
 GREEN="\033[0;32m"
 BLUE="\033[0;34m"

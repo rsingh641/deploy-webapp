@@ -1,5 +1,7 @@
 #! /bin/bash
 
+# This script creates the necessary Azure cloud infrastructure for application
+
 set -e
 
 # Initialise the local environment

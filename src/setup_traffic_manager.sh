@@ -1,10 +1,13 @@
 #! /bin/bash
+# This scrip creates the necessary Azure cloud infrastructure for 
+# disaster recovery and failover to another environment
 
 # Set error handling to exit the script immediately if a command fails
 set -e
 
 # Initialise the local environment
-source lib/initialize
+source src/lib/initialize
+source src/lib/azure/traffic_manager
 
 # Create seperate resource group for traffic manager resources 
 check_and_create_resource_group "$TRAFFIC_MANAGER_RESOURCE_GROUP"

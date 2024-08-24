@@ -2,6 +2,8 @@
 
 set -e
 
+source src/lib/logging
+
 # Function to handle errors and print line number
 handle_error() {
     echo "Error on line $1"
@@ -9,8 +11,6 @@ handle_error() {
 }
 
 trap 'handle_error $LINENO' ERR
-
-source src/lib/logging
 
 # Function to fetch secrets from the encrypted file
 # Decrypt the file using sops key stored in Azure keyvault

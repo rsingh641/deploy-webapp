@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# This script creates an environment configuration directory based on the provided environment name
+# This script creates an new environment configuration for the provided environment name
 
 set -e
 
