@@ -56,9 +56,8 @@ check_and_create_webapp() {
     local public_network_access=$WEBAPP_PUBLIC_NETWORK_ACCESS
     local role=$WEBAPP_ROLE
     local runtime=$WEBAPP_RUNTIME
-    local scope=$WEBAPP_SCOPE
     local startup_file=$WEBAPP_STARTUP_FILE
-    local subnet=$WEBAPP_SUBNET
+    local subnet=$WEBAPP_SUBNET_NAME
     local tags=$WEBAPP_TAGS
     local vnet=$WEBAPP_VNET
 
@@ -77,23 +76,8 @@ check_and_create_webapp() {
             --name "$app_name" \
             --plan "$app_service_plan" \
             --resource-group "$resource_group" \
-            --acr-identity "$acr_identity" \
-            --acr-use-identity "$acr_use_identity" \
-            --assign-identity "$assign_identity" \
             --basic-auth "$basic_auth" \
-            --container-image-name "$container_image_name" \
-            --container-registry-password "$container_registry_password" \
-            --container-registry-url "$container_registry_url" \
-            --container-registry-user "$container_registry_user" \
-            --deployment-container-image-name "$deployment_container_image_name" \
-            --deployment-local-git "$deployment_local_git" \
-            --deployment-source-branch "$deployment_source_branch" \
-            --deployment-source-url "$deployment_source_url" \
-            --docker-registry-server-password "$docker_registry_server_password" \
-            --docker-registry-server-user "$docker_registry_server_user" \
             --https-only "$https_only" \
-            --multicontainer-config-file "$multicontainer_config_file" \
-            --multicontainer-config-type "$multicontainer_config_type" \
             --public-network-access "$public_network_access" \
             --role "$role" \
             --runtime "$runtime" \

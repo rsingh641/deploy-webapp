@@ -1,3 +1,52 @@
 #! /bin/bash
 
 set -e
+
+# Function to deploy UI build artifact to Azure Web App
+deploy_ui_artifact() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local artifact_path=$WEBAPP_ARTIFACT_PATH
+    local track_status=$WEBAPP_TRACK_STATUS
+    local deployment_timeout=$WEBAPP_DEPLOYMENT_TIMEOUT
+
+    # Check if all required parameters are provided
+    if [[ -z "$resource_group" || -z "$webapp_name" || -z "$artifact_path" ]]; then
+        echo "ERROR: Missing required Environment values."
+        echo "please check to insure <resource_group> <webapp_name> <artifact_path> are defined"
+        return 1
+    fi
+
+    # Check if the artifact file exists
+    if [[ ! -f "$artifact_path" ]]; then
+        echo "ERROR: Artifact file '$artifact_path' not found."
+        return 1
+    fi
+
+    # Log the start of the deployment
+    echo "INFO: Starting deployment of artifact '$artifact_path' to Azure Web App '$webapp_name' in resource group '$resource_group'."
+
+    # Deploy the artifact using az CLI
+    az webapp deployment source config-zip \
+        --resource-group "$resource_group" \
+        --name "$webapp_name" \
+        --src "$artifact_path" \
+        --track-status "$track_status" \
+        --deployment-timeout "$deployment_timeout" \
+        --output json > deployment_output.json 2>&1
+
+    # Check if the deployment command was successful
+    if [[ $? -ne 0 ]]; then
+        echo "ERROR: Deployment failed. Check the output below for details:"
+        cat deployment_output.json
+        rm deployment_output.json  # Clean up
+        return 1
+    fi
+
+    echo "INFO: Successfully deployed artifact '$artifact_path' to Azure Web App '$webapp_name'."
+    
+    # Clean up deployment output file
+    rm deployment_output.json
+    
+    return 0
+}
