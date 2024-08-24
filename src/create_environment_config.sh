@@ -36,8 +36,11 @@ mv "${new_env_dir}"/env.secrets.enc.yaml      "${new_env_dir}"/${ENV}.secrets.en
 mv "${new_env_dir}"/env.ui.properties         "${new_env_dir}"/${ENV}.ui.properties
 mv "${new_env_dir}"/env.webservice.properties "${new_env_dir}"/${ENV}.webservice.properties
 
-# Replace "<env>" with $ENV in ${ENV}.ui.properties file
-sed -i "s/<env>/$ENV/g" "${new_env_dir}/${ENV}.secrets.enc.yaml"
+# Replace "<env>" with $ENV in all files
+sed -i "s/<env>/$ENV/g" "${new_env_dir}"/${ENV}.properties
+sed -i "s/<env>/$ENV/g" "${new_env_dir}"/${ENV}.secrets.enc.yaml
+sed -i "s/<env>/$ENV/g" "${new_env_dir}"/${ENV}.ui.properties
+sed -i "s/<env>/$ENV/g" "${new_env_dir}"/${ENV}.webservice.properties
 
 logger "INFO" "Adding path regex and sample azure-kv in sops file"
 logger "INFO" "Please create new sops key for ${ENV} environment in azure keyvault and update sops file"
