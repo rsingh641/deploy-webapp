@@ -2,9 +2,8 @@
 
 set -e
 
-# This file contains functions to trigger failover
-# seperate clear named functions are used to aviod 
-# any confusion at execution time
+# This file contains functions to trigger failover between PROD and DR environments.
+# Seperate clear named functions are used to aviod any confusion at execution time
 
 # Function to switch traffic from Production to DR
 switch_traffic_to_dr() {
@@ -78,3 +77,86 @@ switch_traffic_to_prod() {
     logger "INFO" "Successfully switched traffic to Production."
 }
 
+# Function to test failover from Production to DR and verify success
+test_failover_to_dr() {
+    local traffic_manager_profile=$TRAFFIC_MANAGER_PROFILE
+    local resource_group=$TRAFFIC_MANAGER_RESOURCE_GROUP
+    local prod_endpoint=$TRAFFIC_MANAGER_PROD_ENDPOINT_NAME
+    local dr_endpoint=$TRAFFIC_MANAGER_DR_ENDPOINT_NAME
+    local dr_health_check_url=$DR_HEALTH_CHECK_URL
+
+    logger "INFO" "Testing failover from Production to DR..."
+
+    # Switch traffic to DR
+    switch_traffic_to_dr "$traffic_manager_profile" "$resource_group" "$prod_endpoint" "$dr_endpoint"
+
+    # Verify the failover
+    logger "INFO" "Verifying traffic switch to DR..."
+
+    # Check the priority of the endpoints
+    local prod_priority=$(az trafficmanager endpoint show --profile-name "$traffic_manager_profile" --resource-group "$resource_group" --name "$prod_endpoint" --query "priority" -o tsv)
+    local dr_priority=$(az trafficmanager endpoint show --profile-name "$traffic_manager_profile" --resource-group "$resource_group" --name "$dr_endpoint" --query "priority" -o tsv)
+
+    if [ "$prod_priority" -eq 2 ] && [ "$dr_priority" -eq 1 ]; then
+        logger "INFO" "Traffic priority successfully switched to DR."
+
+        # wait for 10 seconds before proceeding
+        sleep 10
+        
+        # Check if the DR endpoint is responding
+        logger "INFO" "Checking if the DR endpoint is responding..."
+        local http_response=$(curl --write-out "%{http_code}" --silent --output /dev/null "$dr_health_check_url")
+
+        if [ "$http_response" -eq 200 ]; then
+            logger "INFO" "DR endpoint is responding successfully with HTTP status 200."
+        else
+            logger "ERROR" "DR endpoint is not responding correctly. HTTP status: $http_response"
+            exit 1
+        fi
+    else
+        logger "ERROR" "Traffic switch to DR failed. Production priority: $prod_priority, DR priority: $dr_priority"
+        exit 1
+    fi
+}
+
+# Function to test failover from DR to Production and verify success
+test_failover_to_prod() {
+    local traffic_manager_profile=$TRAFFIC_MANAGER_PROFILE
+    local resource_group=$TRAFFIC_MANAGER_RESOURCE_GROUP
+    local prod_endpoint=$TRAFFIC_MANAGER_PROD_ENDPOINT_NAME
+    local dr_endpoint=$TRAFFIC_MANAGER_DR_ENDPOINT_NAME
+    local prod_health_check_url=$PROD_HEALTH_CHECK_URL
+
+    logger "INFO" "Testing failover from DR to Production..."
+
+    # Switch traffic to Production
+    switch_traffic_to_prod "$traffic_manager_profile" "$resource_group" "$prod_endpoint" "$dr_endpoint"
+
+    # Verify the failover
+    logger "INFO" "Verifying traffic switch to Production..."
+
+    # Check the priority of the endpoints
+    local prod_priority=$(az trafficmanager endpoint show --profile-name "$traffic_manager_profile" --resource-group "$resource_group" --name "$prod_endpoint" --query "priority" -o tsv)
+    local dr_priority=$(az trafficmanager endpoint show --profile-name "$traffic_manager_profile" --resource-group "$resource_group" --name "$dr_endpoint" --query "priority" -o tsv)
+
+    if [ "$prod_priority" -eq 1 ] && [ "$dr_priority" -eq 2 ]; then
+        logger "INFO" "Traffic priority successfully switched to Production."
+
+        # wait for 10 seconds before proceeding
+        sleep 10
+
+        # Check if the Production endpoint is responding
+        logger "INFO" "Checking if the Production endpoint is responding..."
+        local http_response=$(curl --write-out "%{http_code}" --silent --output /dev/null "$prod_health_check_url")
+
+        if [ "$http_response" -eq 200 ]; then
+            logger "INFO" "Production endpoint is responding successfully with HTTP status 200."
+        else
+            logger "ERROR" "Production endpoint is not responding correctly. HTTP status: $http_response"
+            exit 1
+        fi
+    else
+        logger "ERROR" "Traffic switch to Production failed. Production priority: $prod_priority, DR priority: $dr_priority"
+        exit 1
+    fi
+}
