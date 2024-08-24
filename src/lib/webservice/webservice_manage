@@ -59,9 +59,9 @@ scale_spring_app() {
 
     # Execute the scale command and check for success
     if eval "$scale_command"; then
-        echo "INFO: Successfully scaled Spring Boot app: $SPRING_APP_NAME"
+        logger "INFO" "Successfully scaled Spring Boot app: $SPRING_APP_NAME"
     else
-        echo "ERROR: Failed to scale Spring Boot app: $SPRING_APP_NAME" >&2
+        logger "ERROR" "Failed to scale Spring Boot app: $SPRING_APP_NAME" >&2
         exit 1
     fi
 }
@@ -80,9 +80,9 @@ switch_webservice_deployment() {
 
     # Execute the command and check for success
     if eval "$set_deployment_command"; then
-        echo "INFO: Successfully switched to deployment: $deployment_name for app: $app_name"
+        logger "INFO" "Successfully switched to deployment: $deployment_name for app: $app_name"
     else
-        echo "ERROR: Failed to switch deployment to: $deployment_name for app: $app_name" >&2
+        logger "ERROR" "Failed to switch deployment to: $deployment_name for app: $app_name" >&2
         exit 1
     fi
 }
@@ -103,9 +103,9 @@ start_webservice() {
 
     # Execute the command and check for success
     if eval "$start_command"; then
-        echo "INFO: Successfully started Spring Boot app: $app_name"
+        logger "INFO" "Successfully started Spring Boot app: $app_name"
     else
-        echo "ERROR: Failed to start Spring Boot app: $app_name" >&2
+        logger "ERROR" "Failed to start Spring Boot app: $app_name" >&2
         exit 1
     fi
 }
@@ -126,9 +126,9 @@ stop_webservice() {
 
     # Execute the command and check for success
     if eval "$stop_command"; then
-        echo "INFO: Successfully stopped Spring Boot app: $app_name"
+        logger "INFO" "Successfully stopped Spring Boot app: $app_name"
     else
-        echo "ERROR: Failed to stop Spring Boot app: $app_name" >&2
+        logger "ERROR" "Failed to stop Spring Boot app: $app_name" >&2
         exit 1
     fi
 }
@@ -146,9 +146,9 @@ unset_webservice_deployment() {
 
     # Execute the command and check for success
     if eval "$unset_deployment_command"; then
-        echo "INFO: Successfully unset the deployment for Spring Boot app: $app_name"
+        logger "INFO" "Successfully unset the deployment for Spring Boot app: $app_name"
     else
-        echo "ERROR: Failed to unset the deployment for Spring Boot app: $app_name" >&2
+        logger "ERROR" "Failed to unset the deployment for Spring Boot app: $app_name" >&2
         exit 1
     fi
 }
@@ -162,19 +162,19 @@ add_storage_to_spring_app() {
     local key_vault_name=$KEYVAULT_NAME
 
     # Fetch storage account name and key from Key Vault
-    echo "INFO: Retrieving storage account credentials from Key Vault: $key_vault_name"
+    logger "INFO" "Retrieving storage account credentials from Key Vault: $key_vault_name"
 
     local account_key=$(az keyvault secret show --vault-name $key_vault_name \
                                                --name "${storage_account_name}-account-key" \
                                                --query value --output tsv)
 
     if [ -z "$storage_account_name" ] || [ -z "$account_key" ]; then
-        echo "ERROR: Failed to retrieve storage account credentials from Key Vault" >&2
+        logger "ERROR" "Failed to retrieve storage account credentials from Key Vault" >&2
         exit 1
     fi
 
     # Add storage account to Spring App
-    echo "INFO: Adding storage account $storage_account_name to Spring App $spring_app_name"
+    logger "INFO" "Adding storage account $storage_account_name to Spring App $spring_app_name"
     az spring app storage add --resource-group $resource_group \
                               --service $spring_service_name \
                               --name $spring_app_name \
@@ -183,11 +183,11 @@ add_storage_to_spring_app() {
                               --account-key $account_key
 
     if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to add storage account $storage_account_name to Spring App $spring_app_name" >&2
+        logger "ERROR" "Failed to add storage account $storage_account_name to Spring App $spring_app_name" >&2
         exit 1
     fi
 
-    echo "INFO: Storage account $storage_account_name added to Spring App $spring_app_name successfully."
+    logger "INFO" "Storage account $storage_account_name added to Spring App $spring_app_name successfully."
 }
 
 # Function to update a Spring Boot app with environment variables

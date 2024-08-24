@@ -12,19 +12,19 @@ deploy_ui_artifact() {
 
     # Check if all required parameters are provided
     if [[ -z "$resource_group" || -z "$webapp_name" || -z "$artifact_path" ]]; then
-        echo "ERROR: Missing required Environment values."
+        logger "ERROR" "Missing required Environment values."
         echo "please check to insure <resource_group> <webapp_name> <artifact_path> are defined"
         return 1
     fi
 
     # Check if the artifact file exists
     if [[ ! -f "$artifact_path" ]]; then
-        echo "ERROR: Artifact file '$artifact_path' not found."
+        logger "ERROR" "Artifact file '$artifact_path' not found."
         return 1
     fi
 
     # Log the start of the deployment
-    echo "INFO: Starting deployment of artifact '$artifact_path' to Azure Web App '$webapp_name' in resource group '$resource_group'."
+    logger "INFO" "Starting deployment of artifact '$artifact_path' to Azure Web App '$webapp_name' in resource group '$resource_group'."
 
     # Deploy the artifact using az CLI
     az webapp deployment source config-zip \
@@ -37,13 +37,13 @@ deploy_ui_artifact() {
 
     # Check if the deployment command was successful
     if [[ $? -ne 0 ]]; then
-        echo "ERROR: Deployment failed. Check the output below for details:"
+        logger "ERROR" "Deployment failed. Check the output below for details:"
         cat deployment_output.json
         rm deployment_output.json  # Clean up
         return 1
     fi
 
-    echo "INFO: Successfully deployed artifact '$artifact_path' to Azure Web App '$webapp_name'."
+    logger "INFO" "Successfully deployed artifact '$artifact_path' to Azure Web App '$webapp_name'."
     
     # Clean up deployment output file
     rm deployment_output.json

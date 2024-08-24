@@ -21,7 +21,7 @@ update_app_service_plan() {
     local subscription="$APP_SERVICE_PLAN_SUBSCRIPTION"
 
     # Log the start of the update process
-    echo "INFO: Updating App Service Plan '$plan_name' in resource group '$resource_group'."
+    logger "INFO" "Updating App Service Plan '$plan_name' in resource group '$resource_group'."
 
     # Start building the az command
     az_command="az appservice plan update --name $plan_name --resource-group $resource_group"
@@ -39,12 +39,12 @@ update_app_service_plan() {
 
     # Execute the command and handle errors
     if ! eval "$az_command"; then
-        echo "ERROR: Failed to update App Service Plan '$plan_name'."
+        logger "ERROR" "Failed to update App Service Plan '$plan_name'."
         return 1
     fi
 
     # Log successful update
-    echo "INFO: Successfully updated App Service Plan '$plan_name'."
+    logger "INFO" "Successfully updated App Service Plan '$plan_name'."
     return 0
 }
 

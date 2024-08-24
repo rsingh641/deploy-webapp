@@ -4,6 +4,11 @@ set -e
 
 # Initialise the local environment
 source lib/initialize
+source lib/azure/keyvault
+source lib/webservice/webservice_infra_deploy
+source lib/webservice/webservice_app_deploy
+source /lib/ui/ui_infra_deploy
+source /lib/ui/ui_app_deploy
 
 # check if keyvault exists, if not create it
 check_and_create_key_vault
@@ -22,13 +27,24 @@ check_and_create_subnet $WEBSERVICE_SUBNET_NAME $WEBSERVICE_SUBNET_PREFIX
 check_and_create_subnet $WEBSERVICE_RUNTIME_SUBNET_NAME $WEBSERVICE_RUNTIME_SUBNET_PREFIX
 check_and_create_subnet $UI_SUBNET_NAME $UI_SUBNET_PREFIX
 
-logger "INFO" "Setting up Applications for [$ENV]"
+logger "INFO" "Setting up application infrastucture for [$ENV]"
 
-logger "INFO" "Check and Create Webservice for [$ENV]"
+logger "INFO" "Check and Create Spring Webservice for [$ENV]"
 check_and_create_spring_service_instance
 check_and_create_spring_app_instance
 
+logger "INFO" "Check and Create UI Webapp for [$ENV]"
+check_and_create_app_service_plan
+check_and_create_webapp
 
+logger "INFO" "Deploying Webservice artifacts to Spring app service instance"
+deploy_webservice_artifacts
 
+logger "INFO" "Deploying UI artifacts to Webapp service instance"
+deploy_ui_artifact
+
+logger "INFO" "Deployment completed successfully for [$ENV]"
+
+exit 0
 
 

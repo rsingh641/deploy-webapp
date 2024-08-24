@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Define colors for logging
+GREEN="\033[0;32m"
+BLUE="\033[0;34m"
+RED="\033[0;31m"
+NC="\033[0m" # No Color
+
+# Define log directory and file
+LOG_DIR=~/deploy_webapps/logs
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+LOG_FILE="${LOG_DIR}/deploy_${TIMESTAMP}.log"
+
+# Create log directory if it doesn't exist
+mkdir -p "$LOG_DIR"
+
+# Function to handle logging
+logger() {
+    LEVEL=$1
+    MESSAGE=$2
+    DATE_STRING=$(date)
+    TO_SHOW="false"
+
+    # LEVELS are INFO, DEBUG, ERROR
+    if [ "$LEVEL" == "INFO" ]; then 
+        COLOR=$GREEN && TO_SHOW="true"
+    elif ([ "$LEVEL" == "DEBUG" ] && [ "$DEBUG_ENABLED" == "true" ]); then 
+        COLOR=$BLUE && TO_SHOW="true" && MESSAGE="($DATE_STRING) $MESSAGE"
+    elif [ "$LEVEL" == "ERROR" ]; then 
+        COLOR=$RED && TO_SHOW="true"
+    fi
+
+    if [ "$TO_SHOW" == "true" ]; then 
+        echo -e "${COLOR}$LEVEL: $MESSAGE${NC}" | tee -a "$LOG_FILE"
+    fi
+}
+

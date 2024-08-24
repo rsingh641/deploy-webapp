@@ -10,24 +10,7 @@ handle_error() {
 
 trap 'handle_error $LINENO' ERR
 
-# Function to handle logging
-logger() {
-    LEVEL=$1
-    MESSAGE=$2
-    DATE_STRING=$(date)
-    TO_SHOW="false"
-    # LEVELS are INFO, DEBUG, ERROR
-    if [ "$LEVEL" == "INFO" ]; then 
-        COLOR=$GREEN && TO_SHOW="true"
-    elif ([ "$LEVEL" == "DEBUG" ] && [ "$DEBUG_ENABLED" == "true" ]); then 
-        COLOR=$BLUE && TO_SHOW="true" && MESSAGE="($DATE_STRING) $MESSAGE"
-    elif [ "$LEVEL" == "ERROR" ]; then 
-        COLOR=$RED && TO_SHOW="true"
-    fi
-    if [ "$TO_SHOW" == "true" ]; then 
-        echo -e "${COLOR}$LEVEL: $MESSAGE${NC}";
-    fi
-}
+source ./logging
 
 # Function to fetch secrets from the encrypted file
 # Decrypt the file using sops key stored in Azure keyvault

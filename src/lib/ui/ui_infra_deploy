@@ -14,17 +14,17 @@ check_and_create_app_service_plan() {
     local tags=$APP_SERVICE_PLAN_TAGS
     local no_wait=$APP_SERVICE_PLAN_NO_WAIT
 
-    echo "INFO: Checking if App Service Plan '$plan_name' exists in resource group '$resource_group'..."
+    logger "INFO" "Checking if App Service Plan '$plan_name' exists in resource group '$resource_group'..."
 
     # Check if the App Service Plan exists
     local exists=$(az appservice plan show --name "$plan_name" --resource-group "$resource_group" --query "name" --output tsv 2>/dev/null)
 
     if [ "$exists" == "$plan_name" ]; then
-        echo "INFO: App Service Plan '$plan_name' already exists in resource group '$resource_group'."
+      logger "INFO" "App Service Plan '$plan_name' already exists in resource group '$resource_group'."
         return 0
     fi
 
-    echo "INFO: App Service Plan '$plan_name' does not exist. Creating it..."
+    logger "INFO" "App Service Plan '$plan_name' does not exist. Creating it..."
 
     # Create the App Service Plan
     az appservice plan create \
@@ -39,11 +39,11 @@ check_and_create_app_service_plan() {
         --no-wait "$no_wait"
 
     if [ $? -ne 0 ]; then
-        echo "ERROR: Failed to create App Service Plan '$plan_name'."
+        logger "ERROR" "Failed to create App Service Plan '$plan_name'."
         exit 1
     fi
 
-    echo "INFO: Successfully created App Service Plan '$plan_name'."
+    logger "INFO" "Successfully created App Service Plan '$plan_name'."
 }
 
 # Function to check and create an Azure Web App
@@ -61,15 +61,15 @@ check_and_create_webapp() {
     local tags=$WEBAPP_TAGS
     local vnet=$WEBAPP_VNET
 
-    echo "INFO: Checking if Web App '$app_name' exists in resource group '$resource_group'..."
+    logger "INFO" "Checking if Web App '$app_name' exists in resource group '$resource_group'..."
 
     # Check if the Web App already exists
     existing_webapp=$(az webapp show --name "$app_name" --resource-group "$resource_group" --query "name" --output tsv 2>/dev/null)
 
     if [ "$existing_webapp" == "$app_name" ]; then
-        echo "INFO: Web App '$app_name' already exists."
+        logger "INFO" "Web App '$app_name' already exists."
     else
-        echo "INFO: Web App '$app_name' does not exist. Creating it..."
+        logger "INFO" "Web App '$app_name' does not exist. Creating it..."
 
         # Create the Web App
         az webapp create \
@@ -88,11 +88,11 @@ check_and_create_webapp() {
             --vnet "$vnet"
 
         if [ $? -ne 0 ]; then
-            echo "ERROR: Failed to create Web App '$app_name'."
+            logger "ERROR" "Failed to create Web App '$app_name'."
             exit 1
         fi
 
-        echo "INFO: Successfully created Web App '$app_name'."
+        logger "INFO" "Successfully created Web App '$app_name'."
     fi
 }
 
