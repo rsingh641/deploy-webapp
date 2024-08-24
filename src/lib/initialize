@@ -9,8 +9,8 @@ PROPERTIES_FILE="config/environments/${ENV}/${ENV}.properties"
 helper_lib="./helper"
 
 source ${PROPERTIES_FILE}
-source ${helper_lib}
-source azure/az_lib
+source src/lib/helper
+source src/lib/azure/az_lib
 
 check_az_cli
 

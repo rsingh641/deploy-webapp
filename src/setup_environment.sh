@@ -3,12 +3,12 @@
 set -e
 
 # Initialise the local environment
-source lib/initialize
-source lib/azure/keyvault
-source lib/webservice/webservice_infra_deploy
-source lib/webservice/webservice_app_deploy
-source /lib/ui/ui_infra_deploy
-source /lib/ui/ui_app_deploy
+source src/lib/initialize
+source src/lib/azure/keyvault
+source src/lib/webservice/webservice_infra_deploy
+source src/lib/webservice/webservice_app_deploy
+source src/lib/ui/ui_infra_deploy
+source src/lib/ui/ui_app_deploy
 
 # check if keyvault exists, if not create it
 check_and_create_key_vault
