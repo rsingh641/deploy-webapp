@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Define colors for logging
+# Define colors for terminal logging
 GREEN="\033[0;32m"
 BLUE="\033[0;34m"
 RED="\033[0;31m"
@@ -16,22 +16,46 @@ mkdir -p "$LOG_DIR"
 
 # Function to handle logging
 logger() {
-    LEVEL=$1
-    MESSAGE=$2
-    DATE_STRING=$(date)
-    TO_SHOW="false"
+    local LEVEL=$1
+    local MESSAGE=$2
+    local DATE_STRING
 
-    # LEVELS are INFO, DEBUG, ERROR
-    if [ "$LEVEL" == "INFO" ]; then 
-        COLOR=$GREEN && TO_SHOW="true"
-    elif ([ "$LEVEL" == "DEBUG" ] && [ "$DEBUG_ENABLED" == "true" ]); then 
-        COLOR=$BLUE && TO_SHOW="true" && MESSAGE="($DATE_STRING) $MESSAGE"
-    elif [ "$LEVEL" == "ERROR" ]; then 
-        COLOR=$RED && TO_SHOW="true"
+    DATE_STRING=$(date +'%Y-%m-%d %H:%M:%S')
+    
+    # Determine log level color and format
+    case "$LEVEL" in
+        INFO)
+            local COLOR=$GREEN
+            ;;
+        DEBUG)
+            if [ "$DEBUG_ENABLED" == "true" ]; then
+                local COLOR=$BLUE
+                MESSAGE="($DATE_STRING) $MESSAGE"
+            else
+                return 0
+            fi
+            ;;
+        ERROR)
+            local COLOR=$RED
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+
+    # Format log entry with timestamp
+    local LOG_ENTRY="[$DATE_STRING] $LEVEL: $MESSAGE"
+
+    # Output to terminal with color if applicable
+    if [ -n "$COLOR" ]; then
+        echo -e "${COLOR}${LOG_ENTRY}${NC}"
     fi
 
-    if [ "$TO_SHOW" == "true" ]; then 
-        echo -e "${COLOR}$LEVEL: $MESSAGE${NC}" | tee -a "$LOG_FILE"
-    fi
+    # Output to log file without color
+    echo "$LOG_ENTRY" >> "$LOG_FILE"
 }
 
+# Example usage
+# logger "INFO" "Script started"
+# logger "DEBUG" "This is a debug message"
+# logger "ERROR" "This is an error message"
