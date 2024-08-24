@@ -2,12 +2,17 @@
 
 # This script creates an environment configuration directory based on the provided environment name
 
-# Set environment variables
-ENV=$1
-
 set -e
 
 source src/lib/helper
+
+# Set environment variables
+if [ -n "$1" ]; then
+    ENV="$1"
+elif [ -z "$ENV" ]; then
+    logger "ERROR" "Environment name is required"
+    exit 1
+fi
 
 ENVIRONMENTS_DIR="config/environments"
 ENV_TEMPLATE_DIR="config/template/environment/env_name"
