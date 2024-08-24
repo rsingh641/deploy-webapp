@@ -502,7 +502,7 @@ create_storage_account_and_store_in_keyvault() {
     echo "INFO: Storage account credentials stored in Key Vault successfully."
 }
 
-# Add Persistent storage in spring app
+# Add Persistent storage account in spring app
 add_storage_to_spring_app() {
     local resource_group=$RESOURCE_GROUP
     local spring_service_name=$SPRING_APP_SERVICE_NAME
@@ -538,4 +538,5 @@ add_storage_to_spring_app() {
 
     echo "INFO: Storage account $storage_account_name added to Spring App $spring_app_name successfully."
 }
+
 
