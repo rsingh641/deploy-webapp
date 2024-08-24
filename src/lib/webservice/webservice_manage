@@ -226,7 +226,7 @@ update_spring_app() {
     [ -n "$SPRING_APP_LIVENESS_PROBE_CONFIG" ] && az_command+=" --liveness-probe-config $SPRING_APP_LIVENESS_PROBE_CONFIG"
     [ -n "$SPRING_APP_LOADED_PUBLIC_CERTIFICATE_FILE" ] && az_command+=" --loaded-public-certificate-file $SPRING_APP_LOADED_PUBLIC_CERTIFICATE_FILE"
     [ -n "$SPRING_APP_MAIN_ENTRY" ] && az_command+=" --main-entry $SPRING_APP_MAIN_ENTRY"
-    [ -n "$SPRING_APP_NO_WAIT" ] && az_command+=" --no-wait"
+    [ -n "$SPRING_APP_NO_WAIT" ] && az_command+=" --no-wait $SPRING_APP_NO_WAIT"
     [ -n "$SPRING_APP_PERSISTENT_STORAGE" ] && az_command+=" --persistent-storage $SPRING_APP_PERSISTENT_STORAGE"
     [ -n "$SPRING_APP_READINESS_PROBE_CONFIG" ] && az_command+=" --readiness-probe-config $SPRING_APP_READINESS_PROBE_CONFIG"
     [ -n "$SPRING_APP_RUNTIME_VERSION" ] && az_command+=" --runtime-version $SPRING_APP_RUNTIME_VERSION"
