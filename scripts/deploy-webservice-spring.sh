@@ -83,6 +83,27 @@ deploy_webservice_artifacts() {
 
 }
 
+# Function to deploy new spring-boot artifacts
+update_webservice_artifacts() {
+    # Update the Spring Boot application artifact
+    logger "INFO" "Updating Spring Boot application artifact to app: $SPRING_APP_NAME"
+
+    # Update the artifact to Azure Spring Apps
+    update_artifact="az spring app deploy --name $SPRING_APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP \
+                    --artifact-path $LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME --deployment-name $SPRING_APP_DEPLOYMENT_NAME \
+                    --runtime-version $SPRING_APP_RUNTIME_VERSION --version $APP_VERSION"
+
+    eval "$update_artifact"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update artifact to Spring Boot app: $SPRING_APP_NAME"
+        exit 1
+    fi
+
+    logger "INFO" "Artifact [$LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME] updated successfully to Spring Boot app: $SPRING_APP_NAME"
+
+}
+
 
 
 # Create App Service Plan
