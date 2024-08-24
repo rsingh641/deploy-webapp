@@ -1,33 +1,51 @@
 #! /bin/bash
+# This functions here should handle management tasks such as 
+# scaling, monitoring, and updating configurations.
 
 set -e
 
-# Function to update an existing App Service Plan
+# Function to update an Azure App Service plan
 update_app_service_plan() {
+
     local plan_name=$APP_SERVICE_PLAN_NAME
-    local resource_group=$RESOURCE_GROUP
-    local elastic_scale=$APP_SERVICE_PLAN_ELASTIC_SCALE
-    local max_elastic_worker_count=$APP_SERVICE_PLAN_MAX_ELASTIC_WORKER_COUNT
-    local no_wait=$APP_SERVICE_PLAN_NO_WAIT
-    local number_of_workers=$APP_SERVICE_PLAN_NUMBER_OF_WORKERS
+    local resource_group="$RESOURCE_GROUP"
+    local sku="$APP_SERVICE_PLAN_SKU"
+    local add="$APP_SERVICE_PLAN_ADD"
+    local elastic_scale="$APP_SERVICE_PLAN_ELASTIC_SCALE"
+    local force_string="$APP_SERVICE_PLAN_FORCE_STRING"
+    local max_elastic_worker_count="$APP_SERVICE_PLAN_MAX_ELASTIC_WORKER_COUNT"
+    local no_wait="$APP_SERVICE_PLAN_NO_WAIT"
+    local number_of_workers="$APP_SERVICE_PLAN_NUMBER_OF_WORKERS"
+    local remove="$APP_SERVICE_PLAN_REMOVE"
+    local set_param="$APP_SERVICE_PLAN_SET"
+    local subscription="$APP_SERVICE_PLAN_SUBSCRIPTION"
 
-    echo "INFO: Updating App Service Plan '$plan_name' in resource group '$resource_group'..."
+    # Log the start of the update process
+    echo "INFO: Updating App Service Plan '$plan_name' in resource group '$resource_group'."
 
-    # Update the App Service Plan
-    az appservice plan update \
-        --name "$plan_name" \
-        --resource-group "$resource_group" \
-        --elastic-scale "$elastic_scale" \
-        --max-elastic-worker-count "$max_elastic_worker_count" \
-        --no-wait "$no_wait" \
-        --number-of-workers "$number_of_workers" \
+    # Start building the az command
+    az_command="az appservice plan update --name $plan_name --resource-group $resource_group"
 
-    if [ $? -ne 0 ]; then
+    [ -n "$sku" ] && az_command+=" --sku $sku"
+    [ -n "$add" ] && az_command+=" --add $add"
+    [ -n "$elastic_scale" ] && az_command+=" --elastic-scale $elastic_scale"
+    [ -n "$force_string" ] && az_command+=" --force-string $force_string"
+    [ -n "$max_elastic_worker_count" ] && az_command+=" --max-elastic-worker-count $max_elastic_worker_count"
+    [ -n "$no_wait" ] && az_command+=" --no-wait"
+    [ -n "$number_of_workers" ] && az_command+=" --number-of-workers $number_of_workers"
+    [ -n "$remove" ] && az_command+=" --remove $remove"
+    [ -n "$set_param" ] && az_command+=" --set $set_param"
+    [ -n "$subscription" ] && az_command+=" --subscription $subscription"
+
+    # Execute the command and handle errors
+    if ! eval "$az_command"; then
         echo "ERROR: Failed to update App Service Plan '$plan_name'."
-        exit 1
+        return 1
     fi
 
+    # Log successful update
     echo "INFO: Successfully updated App Service Plan '$plan_name'."
+    return 0
 }
 
 

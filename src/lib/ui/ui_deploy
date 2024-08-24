@@ -6,7 +6,7 @@ set -e
 deploy_ui_artifact() {
     local resource_group=$RESOURCE_GROUP
     local webapp_name=$WEBAPP_NAME
-    local artifact_path=$WEBAPP_ARTIFACT_PATH
+    local artifact_path="$LOCAL_ARTIFACT_DIR/$WEBAPP_PACKAGE_NAME"
     local track_status=$WEBAPP_TRACK_STATUS
     local deployment_timeout=$WEBAPP_DEPLOYMENT_TIMEOUT
 
