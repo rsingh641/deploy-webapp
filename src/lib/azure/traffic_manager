@@ -1,0 +1,80 @@
+#! /bin/bash
+
+# Set error handling to exit the script immediately if a command fails
+set -e
+
+# Function to create traffic 
+create_traffic_manager_profile() {
+    local profile_name=$TRAFFIC_MANAGER_PROFILE
+    local resource_group=$RESOURCE_GROUP
+    local routing_method=$TRAFFIC_MANAGER_ROUTING_METHOD
+    local unique_dns_name=$TRAFFIC_MANAGER_UNIQUE_DNS
+    local ttl=$TRAFFIC_MANAGER_PROFILE_TTL
+    local protocol_name=$TRAFFIC_MANAGER_PROTOCOL
+    local port=$TRAFFIC_MANAGER_PORT
+
+    logger "INFO" "Creating Traffic Manager profile $profile_name..."
+    az trafficmanager profile create \
+        --name "$profile_name" \
+        --resource-group "$resource_group" \
+        --routing-method $routing_method \
+        --unique-dns-name "$unique_dns_name" \
+        --ttl $ttl \
+        --protocol $protocol \
+        --port $port
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create Traffic Manager profile $profile_name"
+        exit 1
+    fi
+
+    logger "INFO" "Traffic Manager profile $profile_name created successfully."
+}
+
+# Function to add traffic manager endpoint
+add_traffic_manager_endpoint() {
+    local profile_name=$TRAFFIC_MANAGER_PROFILE
+    local resource_group=$RESOURCE_GROUP
+    local endpoint_name=$1
+    local target=$2
+    local priority=$3
+
+    logger "INFO" "Adding endpoint $endpoint_name to Traffic Manager profile $profile_name..."
+    az trafficmanager endpoint create \
+        --name "$endpoint_name" \
+        --profile-name "$profile_name" \
+        --resource-group "$resource_group" \
+        --type external \
+        --target "$target" \
+        --priority "$priority"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to add endpoint $endpoint_name to Traffic Manager profile $profile_name"
+        exit 1
+    fi
+
+    logger "INFO" "Endpoint $endpoint_name added to Traffic Manager profile $profile_name successfully."
+}
+
+# Function to update traffic manager health probes
+update_traffic_manager_health_probes() {
+    local profile_name=$TRAFFIC_MANAGER_PROFILE
+    local resource_group=$RESOURCE_GROUP
+    local path=$1
+    local port=$2
+
+    logger "INFO" "Updating health probes for Traffic Manager profile $profile_name..."
+    az trafficmanager profile update \
+        --name "$profile_name" \
+        --resource-group "$resource_group" \
+        --health-check-path "$path" \
+        --health-check-port "$port"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update health probes for Traffic Manager profile $profile_name"
+        exit 1
+    fi
+
+    logger "INFO" "Health probes updated for Traffic Manager profile $profile_name successfully."
+}
+
