@@ -26,65 +26,203 @@ The Node.js UI is deployed in two slots on Azure Web App service, and the Java S
 
 - **Disaster Recovery**: A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure seamless failover capability in case of an emergency.
 
+
 ## Directory Structure
 
-### `./.sops.yaml`
-Configuration file for SOPS (Secrets OPerationS) which defines how secrets should be encrypted and decrypted.
-It uses Azure keyvault keys to encrypt secrets stored in repository.
+### Configuration
 
-### `./config`
-Configuration files for different environments and general settings.
+- **`./.sops.yaml`**
+  - Configuration file for SOPS (Secrets OPerationS) which defines how secrets should be encrypted and decrypted.
+    It uses Azure keyvault keys to encrypt secrets stored in repository.
 
-- **`./config/common`**: Contains common configuration properties used across all environments.
-  - `common.properties`: General properties common for all environments.
-  - `traffic_manager.properties`: Configuration for Traffic Manager.
+- **`./config/`**
+  - Contains configuration files for different environments and templates.
 
-- **`./config/environments`**: Environment-specific configurations.
-  - **`dev`**: Development environment settings.
-    - `dev.properties`: Environment properties.
-    - `dev.secrets.enc.yaml`: Encrypted secrets for development.
-    - `dev.ui.properties`: UI-specific properties.
-    - `dev.webservice.properties`: Webservice-specific properties.
-  - **`dr`**: Disaster Recovery environment settings.
-    - Similar structure to `dev`.
-  - **`prod`**: Production environment settings.
-    - Similar structure to `dev`.
-  - **`test`**: Test environment settings.
-    - Similar structure to `dev`.
+  - **`./config/common/`**
+    - Contains properties and configuration shared across different environments.
+    - **`common.properties`**
+      - General properties applicable to all environments.
+    - **`traffic_manager.properties`**
+      - Configuration settings for managing traffic.
 
-- **`./config/template`**: Templates for creating new environment configurations.
-  - **`environment/env_name`**: Template structure for a new environment with placeholder values.
+  - **`./config/environments/`**
+    - Environment-specific configuration files.
 
-### `./src`
-Scripts and source code for managing infrastructure and deployments.
+    - **`./config/environments/dev/`**
+      - Configuration for the development environment.
+      - **`dev.properties`**
+        - Properties specific to the development environment.
+      - **`dev.secrets.enc.yaml`**
+        - Encrypted secrets for the development environment.
+      - **`dev.ui.properties`**
+        - UI-specific properties for the development environment.
+      - **`dev.webservice.properties`**
+        - Web service-specific properties for the development environment.
 
-- **`./src/create_app_infra.sh`**: Script to create Azure application infrastructure.
-- **`./src/create_new_env_configuration.sh`**: Script to create a new environment configuration.
-- **`./src/deploy_app.sh`**: Script to deploy the application to Azure.
+    - **`./config/environments/dr/`**
+      - Configuration for the dr environment.
+      -  Same as dev.
 
-- **`./src/lib`**: Library code divided into functional areas.
-  - **`./src/lib/azure`**: Functions for managing Azure resources.
-    - **`app_gateway`**: Application Gateway-related functions.
-    - **`app_insights`**: Application Insights-related functions.
-    - **`az_lib`**: General Azure CLI library functions.
-    - **`failover`**: Failover-related functions.
-    - **`keyvault`**: Key Vault-related functions.
-    - **`network`**: Network-related functions.
-    - **`storage_acc`**: Storage Account-related functions.
-    - **`traffic_manager`**: Traffic Manager-related functions.
-  - **`./src/lib/helper`**: Utility functions used across the project.
-  - **`./src/lib/initialize`**: Initialization functions for setting up the project.
-  - **`./src/lib/logging`**: Logging functions for error handling and information.
-  - **`./src/lib/ui`**: Functions related to UI application deployment and management.
-    - **`ui_app_deploy`**: Deployment scripts for UI applications.
-    - **`ui_infra_deploy`**: Infrastructure deployment scripts for UI applications.
-    - **`ui_manage`**: Management scripts for UI applications.
-  - **`./src/lib/webservice`**: Functions related to webservice application deployment and management.
-    - **`webservice_app_deploy`**: Deployment scripts for webservice applications.
-    - **`webservice_infra_deploy`**: Infrastructure deployment scripts for webservice applications.
-    - **`webservice_manage`**: Management scripts for webservice applications.
+    - **`./config/environments/prod/`**
+      - Configuration for the production environment.
+      -  Same as dev.
 
-- **`./src/setup_traffic_manager.sh`**: Script to set up Traffic Manager profiles.
+    - **`./config/environments/test/`**
+      - Configuration for the testing environment.
+      -  Same as dev.
+
+  - **`./config/template/`**
+    - Templates for creating new environments.
+    - **`./config/template/environment/`**
+      - **`env_name/`**
+        - Placeholder for environment-specific configurations.
+        - **`env.properties`**
+          - Properties for a new environment.
+        - **`env.secrets.enc.yaml`**
+          - Encrypted secrets for a new environment.
+        - **`env.ui.properties`**
+          - UI-specific properties for a new environment.
+        - **`env.webservice.properties`**
+          - Web service-specific properties for a new environment.
+
+### Source Code
+
+- **`./src/`**
+  - Contains scripts and libraries for various operational tasks.
+
+  - **`./src/backup/`**
+    - Scripts for managing backups.
+    - **`enable_auto_backups.sh`**
+      - Script to enable automatic backups for applications.
+    - **`manual_backup_webapp.sh`**
+      - Script to perform manual backups of the web application.
+
+  - **`./src/blue-green-control/`**
+    - Scripts for managing blue-green deployment strategy.
+    - **`./src/blue-green-control/ui/`**
+      - **`ui_switch_blue_to_green.sh`**
+        - Switch the UI deployment from blue to green.
+      - **`ui_switch_green_to_blue.sh`**
+        - Switch the UI deployment from green to blue.
+    - **`./src/blue-green-control/webservice/`**
+      - **`webservice_switch_blue_to_green.sh`**
+        - Switch the web service deployment from blue to green.
+      - **`webservice_switch_green_to_blue.sh`**
+        - Switch the web service deployment from green to blue.
+
+  - **`./src/create_new_env_configuration.sh`**
+    - Script to generate configuration files for a new environment.
+
+  - **`./src/deploy/`**
+    - Scripts for deploying applications.
+    - **`deploy_app.sh`**
+      - Script to deploy the application to the specified environment.
+
+  - **`./src/DR_resources/`**
+    - Scripts for disaster recovery setup.
+    - **`setup_traffic_manager.sh`**
+      - Script to configure the traffic manager for disaster recovery scenarios.
+
+  - **`./src/failover/`**
+    - Scripts for handling failovers.
+    - **`failover_to_DR.sh`**
+      - Script to failover to disaster recovery.
+    - **`failover_to_Prod.sh`**
+      - Script to failover to production.
+    - **`test_failover_to_DR.sh`**
+      - Script to test failover to disaster recovery.
+    - **`test_failover_to_PROD.sh`**
+      - Script to test failover to production.
+
+  - **`./src/infra/`**
+    - Scripts for setting up infrastructure.
+    - **`configure_app_gateway.sh`**
+      - Script to configure the application gateway.
+    - **`create_app_infra.sh`**
+      - Script to create the necessary infrastructure for the application.
+    - **`setup_blue_green_model.sh`**
+      - Script to set up the blue-green deployment model.
+    - **`setup_network_resources.sh`**
+      - Script to configure network resources.
+
+  - **`./src/lib/`**
+    - Libraries for various functionalities.
+    - **`./src/lib/azure/`**
+      - Libraries for interacting with Azure services.
+      - **`app_gateway/`**
+        - Azure application gateway management functions.
+      - **`app_insights/`**
+        - Azure application insights management functions.
+      - **`autoscaling/`**
+        - Azure autoscaling management functions.
+      - **`az_lib/`**
+        - General Azure library functions.
+      - **`backup/`**
+        - Azure backup management functions.
+      - **`failover/`**
+        - Azure failover management functions.
+      - **`keyvault/`**
+        - Azure Key Vault management functions.
+      - **`network/`**
+        - Azure network management functions.
+      - **`storage_acc/`**
+        - Azure storage account management functions.
+      - **`traffic_manager/`**
+        - Azure traffic manager management functions.
+    - **`./src/lib/helper/`**
+      - Helper functions and utilities.
+    - **`./src/lib/initialize/`**
+      - Initialization scripts and functions for setting up the environment.
+    - **`./src/lib/logging/`**
+      - Logging utilities and functions.
+    - **`./src/lib/ui/`**
+      - Libraries for UI deployment and management.
+    - **`./src/lib/webservice/`**
+      - Libraries for web service deployment and management.
+
+  - **`./src/manage/`**
+    - Management scripts for UI and web services.
+    - **`./src/manage/ui/`**
+      - **`ui_restart.sh`**
+        - Restart UI service.
+      - **`ui_start.sh`**
+        - Start UI service.
+      - **`ui_stop.sh`**
+        - Stop UI service.
+      - **`ui_update.sh`**
+        - Update UI service.
+    - **`./src/manage/webservice/`**
+      - **`webservice_restart.sh`**
+        - Restart web service.
+      - **`webservice_start.sh`**
+        - Start web service.
+      - **`webservice_stop.sh`**
+        - Stop web service.
+      - **`webservice_update.sh`**
+        - Update web service.
+
+  - **`./src/monitor/`**
+    - Monitoring and alerting scripts.
+    - **`enable_alerts.sh`**
+      - Script to enable alerts for monitoring.
+    - **`enable_monitoring.sh`**
+      - Script to enable monitoring for applications.
+
+  - **`./src/scaling/`**
+    - Scripts for scaling applications.
+    - **`enable_autoscaling.sh`**
+      - Script to enable autoscaling for applications.
+    - **`ui_scale.sh`**
+      - Script to scale UI service.
+    - **`webservice_scale.sh`**
+      - Script to scale web service.
+
+  - **`./src/update/`**
+    - Update scripts for applications.
+    - **`update_ui.sh`**
+      - Script to update the UI service.
+    - **`update_webservice.sh`**
+      - Script to update the web service.
 
 ## Getting Started
 
