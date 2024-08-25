@@ -9,8 +9,7 @@ and managing environment-specific settings.
 - **Azure Resource Management**: Scripts for creating and managing Azure resources, including Application Gateway, Traffic Manager, and Key Vault.
 - **Application Deployment**: Automated deployment of Node.js (UI) and Spring Boot (Backend) applications to Azure App Services and Azure Spring Apps Service.
 - **Blue-Green Deployment**: The project employs a Blue-Green Deployment model to minimize downtime and reduce risk during application updates. This approach involves maintaining two identical production environments, referred to as "Blue" and "Green."
-NodeJs UI is deployed in 2 slots in Azure Webapp service and Java Spring boot Webservice is deployed in 2 deployment using Azure Webapp service.
-Functions have been provided to switch between Blue-Green deployments.
+The Node.js UI is deployed in two slots on Azure Web App service, and the Java Spring Boot Webservice is deployed in two deployment instances using Azure Spring App service. Blue-Green deployment switching is supported.
 - **Environment-Specific Configurations**: Management of environment-specific properties and secrets, with support for encrypted secrets using SOPS and reading and writing secrets to Azure Key Vault Service.
 - **Scaling and High Availability**: Functions for scaling applications and ensuring high availability through Traffic Manager profiles and Azure scaling capabilities.
 - **Logging and Error Handling**: Comprehensive logging and error handling mechanisms for better visibility and troubleshooting.
