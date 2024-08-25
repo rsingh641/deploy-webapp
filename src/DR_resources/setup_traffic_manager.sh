@@ -1,5 +1,5 @@
 #! /bin/bash
-# This scrip creates the necessary Azure cloud infrastructure for 
+# This script creates the necessary Azure cloud infrastructure for 
 # disaster recovery and failover to another environment
 
 # Set error handling to exit the script immediately if a command fails

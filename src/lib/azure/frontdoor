@@ -1,0 +1,169 @@
+#! /bin/bash
+# This functions here create Azure front door for global load balancing
+# between multi reagion deployments
+
+set -e
+
+create_front_door() {
+    local front_door_name=$FRONT_DOOR_NAME
+    local resource_group=$FRONT_DOOR_RESOURCE_GROUP
+    local sku=$FRONT_DOOR_SKU
+    local enabled_state=$FRONT_DOOR_ENABLED_STATE
+
+    logger "INFO" "Creating Azure Front Door: $front_door_name"
+    az frontdoor create \
+        --name "$front_door_name" \
+        --resource-group "$resource_group" \
+        --enabled-state "$enabled_state" \
+        --sku "$sku"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create Azure Front Door."
+        exit 1
+    fi
+    logger "INFO" "Azure Front Door created successfully."
+}
+
+create_frontend_endpoint() {
+    local front_door_name=$FRONT_DOOR_NAME
+    local resource_group=$FRONT_DOOR_RESOURCE_GROUP
+    local endpoint_name=$FRONT_DOOR_FRONTEND_ENDPOINT
+    local host_name=$FRONT_DOOR_HOST_NAME
+
+    logger "INFO" "Creating Frontend Endpoint: $endpoint_name"
+    az frontdoor frontend-endpoint create \
+        --frontdoor-name "$front_door_name" \
+        --resource-group "$resource_group" \
+        --name "$endpoint_name" \
+        --host-name "$host_name"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Error: Failed to create Frontend Endpoint."
+        exit 1
+    fi
+    logger "INFO" "Frontend Endpoint created successfully."
+}
+
+create_backend_pool() {
+    local front_door_name=$FRONT_DOOR_NAME
+    local resource_group=$FRONT_DOOR_RESOURCE_GROUP
+    local backend_pool_name=$FRONT_DOOR_BACKEND_POOL_NAME
+
+    logger "INFO" "Creating Backend Pool: $backend_pool_name"
+    az frontdoor backend-pool create \
+        --frontdoor-name "$front_door_name" \
+        --resource-group "$resource_group" \
+        --name "$backend_pool_name"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Error: Failed to create Backend Pool."
+        exit 1
+    fi
+    logger "INFO" "Backend Pool created successfully."
+}
+
+add_backend_to_pool() {
+    local front_door_name=$FRONT_DOOR_NAME
+    local resource_group=$FRONT_DOOR_RESOURCE_GROUP
+    local backend_pool_name=$FRONT_DOOR_BACKEND_POOL_NAME
+    local backend_address=$FRONT_DOOR_BACKEND_ADDRESS
+    local http_port=$FRONT_DOOR_HTTP_PORT
+    local https_port=$FRONT_DOOR_HTTPS_PORT
+    local priority=$FRONT_DOOR_BACKEND_POOL_PRIORITY
+    local weight=$FRONT_DOOR_BACKEND_POOL_WEIGHT
+
+    logger "INFO" "Adding Backend: $backend_address to Pool: $backend_pool_name"
+    az frontdoor backend-pool backend add \
+        --frontdoor-name "$front_door_name" \
+        --resource-group "$resource_group" \
+        --backend-pool-name "$backend_pool_name" \
+        --address "$backend_address" \
+        --http-port "$http_port" \
+        --https-port "$https_port" \
+        --priority "$priority" \
+        --weight "$weight"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Error: Failed to add Backend to Pool."
+        exit 1
+    fi
+    logger "INFO" "Backend added to Pool successfully."
+}
+
+create_routing_rule() {
+    local front_door_name=$FRONT_DOOR_NAME
+    local resource_group=$FRONT_DOOR_RESOURCE_GROUP
+    local routing_rule_name=$FRONT_DOOR_ROUTING_RULE
+    local frontend_endpoints=$FRONT_DOOR_FRONTEND_ENDPOINT
+    local backend_pool_name=$FRONT_DOOR_BACKEND_POOL_NAME
+    local patterns_to_match=$FRONT_DOOR_ROUTING_PATTERN_TO_MATCH
+    local accepted_protocols=$FRONT_DOOR_ROUTING_ACCEPTED_PROTOCOLS
+    local route_type=$FRONT_DOOR_ROUTING_TYPE
+
+    logger "INFO" "Creating Routing Rule: $routing_rule_name"
+    az frontdoor routing-rule create \
+        --frontdoor-name "$front_door_name" \
+        --resource-group "$resource_group" \
+        --name "$routing_rule_name" \
+        --frontend-endpoints "$frontend_endpoints" \
+        --accepted-protocols "$accepted_protocols" \
+        --patterns-to-match "$patterns_to_match" \
+        --route-type "$route_type" \
+        --backend-pool "$backend_pool_name"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Error: Failed to create Routing Rule."
+        exit 1
+    fi
+    logger "INFO" "Routing Rule created successfully."
+}
+
+integrate_traffic_manager_with_front_door() {
+    local front_door_name=$FRONT_DOOR_NAME
+    local resource_group=$FRONT_DOOR_RESOURCE_GROUP
+    local backend_pool_name=$FRONT_DOOR_BACKEND_POOL_NAME
+    local traffic_manager_profile_dns=$TRAFFIC_MANAGER_UNIQUE_DNS_NAME
+    local http_port=$FRONT_DOOR_HTTP_PORT
+    local https_port=$FRONT_DOOR_HTTPS_PORT
+    local priority=$FRONT_DOOR_BACKEND_POOL_PRIORITY
+    local weight=$FRONT_DOOR_BACKEND_POOL_WEIGHT
+
+    logger "INFO" "Integrating Traffic Manager Profile: $traffic_manager_profile_dns with Front Door"
+    az frontdoor backend-pool backend add \
+        --frontdoor-name "$front_door_name" \
+        --resource-group "$resource_group" \
+        --backend-pool-name "$backend_pool_name" \
+        --address "$traffic_manager_profile_dns" \
+        --http-port "$http_port" \
+        --https-port "$https_port" \
+        --priority "$priority" \
+        --weight "$weight"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Error: Failed to integrate Traffic Manager with Front Door."
+        exit 1
+    fi
+    logger "INFO" "Traffic Manager integrated with Front Door successfully."
+}
+
+verify_configuration() {
+    local front_door_name="$1"
+    local resource_group="$2"
+    local traffic_manager_profile_name="$3"
+
+    logger "INFO" "Verifying Azure Front Door configuration..."
+    az frontdoor show --name "$front_door_name" --resource-group "$resource_group"
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to verify Azure Front Door configuration."
+        exit 1
+    fi
+
+    logger "INFO" "Verifying Traffic Manager configuration..."
+    az trafficmanager profile show --name "$traffic_manager_profile_name" --resource-group "$resource_group"
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Error: Failed to verify Traffic Manager configuration."
+        exit 1
+    fi
+
+    logger "INFO" "Configuration verified successfully."
+}
