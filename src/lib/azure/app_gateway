@@ -54,7 +54,7 @@ add_backend_pool() {
 
 # Function to create http settings
 create_http_settings() {
-    local resource_group=$RESOURCE_GROUP_
+    local resource_group=$RESOURCE_GROUP
     local app_gateway_name=$APP_GATEWAY_NAME
     local http_settings_name=$1
     local port=$2

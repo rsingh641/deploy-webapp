@@ -12,6 +12,8 @@ source src/lib/webservice/webservice_app_deploy
 source src/lib/ui/ui_infra_deploy
 source src/lib/ui/ui_app_deploy
 
+logger "INFO" "Starting to create the application infrstructure in Azure for ${ENV}"
+
 # check if keyvault exists, if not create it
 check_and_create_key_vault
 
@@ -63,10 +65,10 @@ create_nsg_rule $RESOURCE_GROUP $SPRING_APP_NSG_NAME "Allow-HTTP" 100 "Inbound" 
 
 logger "INFO" "NSG creation and subnet association completed."
 
+
+logger "INFO" "Creating application Gateway"
 create_application_gateway 
 
 logger "INFO" "Application Infra creation completed successfully for [$ENV]"
 
 exit 0
-
-
