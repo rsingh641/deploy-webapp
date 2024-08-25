@@ -17,6 +17,7 @@ and managing environment-specific settings.
 
 ### `./.sops.yaml`
 Configuration file for SOPS (Secrets OPerationS) which defines how secrets should be encrypted and decrypted.
+It uses Azure keyvault keys to encrypt secrets stored in repository.
 
 ### `./config`
 Configuration files for different environments and general settings.
