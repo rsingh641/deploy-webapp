@@ -1,0 +1,98 @@
+#! /bin/bash
+
+set -e
+
+# Function to create application gateway
+create_application_gateway() {
+    local resource_group=$RESOURCE_GROUP_NAME
+    local app_gateway_name=$APP_GATEWAY_NAME
+    local vnet_name=$VNET_NAME
+    local subnet_name=$APP_GATEWAY_SUBNET_NAME
+    local sku=$APP_GATEWAY_SKU
+    local capacity=$APP_GATEWAY_CAPACITY
+    local frontend_port=$APP_GATEWAY_FRONTEND_PORT
+    local http_settings_port=$APP_GATEWAY_HTTP_SETTINGS_PORT
+    local routing_rule_type=$APP_GATEWAY_ROUTING_RULE_TYPE
+
+    az network application-gateway create --resource-group "$resource_group" \
+                                          --name "$app_gateway_name" \
+                                          --vnet-name "$vnet_name" \
+                                          --subnet "$subnet_name" \
+                                          --sku "$sku" \
+                                          --capacity $capacity \
+                                          --frontend-port $frontend_port \
+                                          --http-settings-port $http_settings_port \
+                                          --routing-rule-type $routing_rule_type
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create Application Gateway: $app_gateway_name."
+        exit 1
+    fi
+
+    logger "INFO" "Application Gateway $app_gateway_name created successfully."
+}
+
+# Function to add backend pool
+add_backend_pool() {
+    local resource_group=$RESOURCE_GROUP_NAME
+    local app_gateway_name=$APP_GATEWAY_NAME
+    local pool_name="$1"
+    local backend_addresses="$2" # Comma-separated list of backend addresses
+
+    az network application-gateway address-pool create --resource-group "$resource_group" \
+                                                        --gateway-name "$app_gateway_name" \
+                                                        --name "$pool_name" \
+                                                        --servers "$backend_addresses"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to add Backend Pool: $pool_name to Application Gateway: $app_gateway_name."
+        exit 1
+    fi
+
+    logger "INFO" "Backend Pool $pool_name added successfully."
+}
+
+# Function to create http settings
+create_http_settings() {
+    local resource_group=$RESOURCE_GROUP_
+    local app_gateway_name=$APP_GATEWAY_NAME
+    local http_settings_name=$1
+    local port=$2
+    local protocol=$3
+    
+    az network application-gateway http-settings create --resource-group "$resource_group" \
+                                                        --gateway-name "$app_gateway_name" \
+                                                        --name "$http_settings_name" \
+                                                        --port "$port" \
+                                                        --protocol "$protocol"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create HTTP Settings: $http_settings_name for Application Gateway: $app_gateway_name."
+        exit 1
+    fi
+
+    logger "INFO" "HTTP Settings $http_settings_name created successfully."
+}
+
+# Function to create routing rules
+create_routing_rule() {
+    local resource_group=$RESOURCE_GROUP
+    local app_gateway_name=$APP_GATEWAY_NAME
+    local rule_name="$1"
+    local listener_name="$2"
+    local backend_pool_name="$3"
+    local http_settings_name="$4"
+    
+    az network application-gateway url-path-map create --resource-group "$resource_group" \
+                                                       --gateway-name "$app_gateway_name" \
+                                                       --name "$rule_name" \
+                                                       --default-backend-address-pool "$backend_pool_name" \
+                                                       --default-backend-http-settings "$http_settings_name"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create Routing Rule: $rule_name for Application Gateway: $app_gateway_name."
+        exit 1
+    fi
+
+    logger "INFO" "Routing Rule $rule_name created successfully."
+}

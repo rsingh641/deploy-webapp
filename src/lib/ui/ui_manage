@@ -18,7 +18,6 @@ update_app_service_plan() {
     local number_of_workers="$APP_SERVICE_PLAN_NUMBER_OF_WORKERS"
     local remove="$APP_SERVICE_PLAN_REMOVE"
     local set_param="$APP_SERVICE_PLAN_SET"
-    local subscription="$APP_SERVICE_PLAN_SUBSCRIPTION"
 
     # Log the start of the update process
     logger "INFO" "Updating App Service Plan '$plan_name' in resource group '$resource_group'."
@@ -35,7 +34,6 @@ update_app_service_plan() {
     [ -n "$number_of_workers" ] && az_command+=" --number-of-workers $number_of_workers"
     [ -n "$remove" ] && az_command+=" --remove $remove"
     [ -n "$set_param" ] && az_command+=" --set $set_param"
-    [ -n "$subscription" ] && az_command+=" --subscription $subscription"
 
     # Execute the command and handle errors
     if ! eval "$az_command"; then
@@ -48,4 +46,110 @@ update_app_service_plan() {
     return 0
 }
 
+# Function to restart an Azure WebApp
+restart_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
 
+    logger "INFO" "Restarting WebApp: $webapp_name in Resource Group: $resource_group..."
+
+    az webapp restart --name "$webapp_name" --resource-group "$resource_group"
+    
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to restart WebApp: $webapp_name in Resource Group: $resource_group"
+        return 1
+    fi
+
+    logger "INFO" "WebApp: $webapp_name successfully restarted in Resource Group: $resource_group"
+    return 0
+}
+
+# Function to scale an Azure WebApp
+scale_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local instance_count=$WEBAPP_INSTANCE_COUNT
+    local slot=$WEBAPP_SLOT
+
+    logger "INFO" "Scaling WebApp: $webapp_name in Resource Group: $resource_group to $instance_count instances..."
+
+    if [ -z "$slot" ]; then
+        az webapp scale --resource-group "$resource_group" --name "$webapp_name" --instance-count "$instance_count"
+    else
+        az webapp scale --resource-group "$resource_group" --name "$webapp_name" --instance-count "$instance_count" --slot "$slot"
+    fi
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to scale WebApp: $webapp_name in Resource Group: $resource_group"
+        return 1
+    fi
+
+    logger "INFO" "Successfully scaled WebApp: $webapp_name in Resource Group: $resource_group to $instance_count instances"
+    return 0
+}
+
+# Function to start an Azure WebApp
+start_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local slot=$WEBAPP_SLOT
+
+    logger "INFO" "Starting WebApp: $webapp_name in Resource Group: $resource_group..."
+
+    if [ -z "$slot" ]; then
+        az webapp start --resource-group "$resource_group" --name "$webapp_name"
+    else
+        az webapp start --resource-group "$resource_group" --name "$webapp_name" --slot "$slot"
+    fi
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to start WebApp: $webapp_name in Resource Group: $resource_group"
+        return 1
+    fi
+
+    logger "INFO" "Successfully started WebApp: $webapp_name in Resource Group: $resource_group"
+    return 0
+}
+
+# Function to stop an Azure WebApp
+stop_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local slot=$WEBAPP_SLOT
+
+    logger "INFO" "Stopping WebApp: $webapp_name in Resource Group: $resource_group..."
+
+    if [ -z "$slot" ]; then
+        az webapp stop --resource-group "$resource_group" --name "$webapp_name"
+    else
+        az webapp stop --resource-group "$resource_group" --name "$webapp_name" --slot "$slot"
+    fi
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to stop WebApp: $webapp_name in Resource Group: $resource_group"
+        return 1
+    fi
+
+    logger "INFO" "Successfully stopped WebApp: $webapp_name in Resource Group: $resource_group"
+    return 0
+}
+
+# Function to Swap Slots
+swap_slots() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local source_slot="$1"
+    local target_slot="$2"
+
+    logger "INFO" "Swapping slots: $source_slot with $target_slot for WebApp: $webapp_name in Resource Group: $resource_group..."
+
+    az webapp deployment slot swap --resource-group "$resource_group" --name "$webapp_name" --slot "$source_slot" --target-slot "$target_slot"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to swap slots: $source_slot and $target_slot"
+        return 1
+    fi
+
+    logger "INFO" "Successfully swapped slots: $source_slot with $target_slot."
+    return 0
+}

@@ -7,7 +7,6 @@ set_spring_app_env_vars() {
     local spring_app_name=$SPRING_APP_NAME
     local resource_group=$RESOURCE_GROUP
     local spring_service_name=$SPRING_APP_SERVICE_NAME
-    shift 3
     local env_vars=("$@")
 
     logger "INFO" "Injecting environment variables into Spring Boot application $spring_app_name..."
@@ -39,8 +38,7 @@ fetch_and_provide_db2_certs() {
     db2_ca_cert=$(fetch_secret_from_keyvault "$key_vault_name" "$db2_ca_cert_name")
 
     # Injecting certificates into Spring Boot application as environment variables
-    set_spring_app_env_vars "$spring_app_name" "$resource_group" "$spring_service_name" \
-        "DB2_CLIENT_CERT=$db2_client_cert" "DB2_CLIENT_KEY=$db2_client_key" "DB2_CA_CERT=$db2_ca_cert"
+    set_spring_app_env_vars "DB2_CLIENT_CERT=$db2_client_cert" "DB2_CLIENT_KEY=$db2_client_key" "DB2_CA_CERT=$db2_ca_cert"
 }
 
 # Function for scaling webservice
@@ -68,6 +66,7 @@ scale_spring_app() {
     fi
 }
 
+# Function to switch webservice between green-blue deployment
 switch_webservice_deployment() {
     local deployment_name=$SPRING_APP_DEPLOYMENT_NAME
     local app_name=$SPRING_APP_NAME

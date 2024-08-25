@@ -25,10 +25,11 @@ create_storage_account_and_store_in_keyvault
 check_and_create_app_insights
 
 # checking if required subnets exist, if not create them
-# We are using seperate subnets for webservice, ui and webservice runtime
+# We are using seperate subnets for webservice, webservice runtime, UI and Application Gateway
 check_and_create_subnet $WEBSERVICE_SUBNET_NAME $WEBSERVICE_SUBNET_PREFIX
 check_and_create_subnet $WEBSERVICE_RUNTIME_SUBNET_NAME $WEBSERVICE_RUNTIME_SUBNET_PREFIX
 check_and_create_subnet $UI_SUBNET_NAME $UI_SUBNET_PREFIX
+check_and_create_subnet $APP_GATEWAY_SUBNET_NAME $APP_GATEWAY_SUBNET_PREFIX
 
 logger "INFO" "Setting up application infrastucture for [$ENV]"
 
@@ -66,6 +67,8 @@ logger "INFO" "Create NSG rule in $SPRING_APP_NSG_NAME to allow traffic"
 create_nsg_rule $RESOURCE_GROUP $SPRING_APP_NSG_NAME "Allow-HTTP" 100 "Inbound" "Allow" "Tcp" "*" "80" "*" "*"
 
 logger "INFO" "NSG creation and subnet association completed."
+
+create_application_gateway 
 
 logger "INFO" "Application Infra creation completed successfully for [$ENV]"
 

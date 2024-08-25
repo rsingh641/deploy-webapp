@@ -95,3 +95,22 @@ check_and_create_webapp() {
         logger "INFO" "Successfully created Web App '$app_name'."
     fi
 }
+
+create_webapp_deployment_slot() {
+    local resource_group=$RESOURCE_GROUP_NAME
+    local webapp_name=$WEBAPP_NAME
+    local slot_name=$1
+
+    logger "INFO" "Creating deployment slot: $slot_name for WebApp: $webapp_name in Resource Group: $resource_group..."
+
+    az webapp deployment slot create --resource-group "$resource_group" --name "$webapp_name" --slot "$slot_name"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create deployment slot: $slot_name"
+        return 1
+    fi
+
+    logger "INFO" "Deployment slot $slot_name created successfully."
+    return 0
+}
+
