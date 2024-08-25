@@ -42,10 +42,105 @@ Includes a comprehensive set of libraries for interacting with Azure services, s
 **Detailed Logging and Initialization**
 Provides logging utilities and initialization scripts to ensure proper setup and monitoring of application and infrastructure components.
 
+**Azure Front Door for High Availability**
+  - **Global Load Balancing**: Routes traffic to the nearest and healthiest backend for low latency and high performance.
+  - **Health Probes & Failover**: Continuously monitors backend health, automatically rerouting traffic to healthy endpoints in case of failures.
+  - **Traffic Routing**: Supports various routing methods (priority, weighted, geographic) for flexible traffic management.
+
 **Failover Mechanism Using Azure Traffic Manager for Disaster recovery**
 Features a failover mechanism leveraging Azure Traffic Manager to ensure high availability between Production and Disaster Recovery (DR) environments. Traffic Manager routes traffic based on configured policies and health checks, enabling seamless failover from Prod to DR in case of a failure. Includes scripts for configuring Traffic Manager profiles and managing traffic routing between environments to maintain service continuity and minimize downtime.
 
-A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure seamless failover capability in case of an emergency.
+A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure 
+seamless failover capability in case of an emergency.
+
+## Getting Started
+
+1. **Environment Configuration**
+   - Run `./src/create_new_env_configuration.sh <env>` to set up new environment configurations.
+
+2. **Configuration Setup**
+   - Update the configuration files in `./config/environments/<env>/` as needed for your environments.
+
+3. **Infrastructure Creation**
+   - Run `./src/infra/create_app_infra.sh` to create the necessary Azure infrastructure.
+
+4. **Application Gateway Creation**
+   - Run `./src/infra/create_app_infra.sh` to create the necessary Azure infrastructure.
+
+5. **Network Resources Creation**
+   - Run `./src/infra/setup_network_resources.sh` to create the necessary Network components in Azure infrastructure.
+
+6. **Setup Blue-Green Deployment** [only for Production and Disaster Recovery]
+   - Run `./src/infra/setup_blue_green_model.sh` to create the necessary instances for Blue-Green deployment strategy in Azure infrastructure.
+
+   - Run `./src/blue-green-control/ui/ui_switch_blue_to_green.sh` to switch the UI deployment from blue to green.
+   - Run `./src/blue-green-control/ui/ui_switch_green_to_blue.sh` to switch the UI deployment from green to blue.
+
+   - Run `./src/blue-green-control/webservice/webservice_switch_blue_to_green.sh` to switch the Webservice deployment from blue to green.
+   - Run `./src/blue-green-control/webservice/webservice_switch_green_to_blue.sh` to switch the Webservice deployment from green to blue.
+
+7. **Application Deployment**
+   - Run `./src/deploy/deploy_app.sh` to deploy your application. It also configures Application Gateway
+
+8. **Updating or Upgrading application builds or configuration updates**
+   - Run `./src/update/ui_update.sh` to push updates to UI instance.
+   - Run `./src/update/webservice_update.sh` to push updates to Webservice instance.
+
+9. **Enable Autoscaling**
+   - Run `./src/scaling/enable_autoscaling.sh` to enable autoscaling for ui and webservice instances.
+
+10. **Manual scaling**
+   - Run `./src/scaling/ui_scale.sh` to manually scale ui instances.
+   - Run `./src/scaling/webservice_scale.sh` to manually scale webservice instances.
+
+11. **Enable Monitoring**
+   - Run `./src/monitor/enable_monitoring.sh` to enable monitoring of UI and Webservce instances using Application Insights.
+
+12. **Enable Alerts**
+   - Run `./src/monitor/enable_alearts.sh` to enable metrics based email and sms alearts for UI and Webservice instances.
+
+13. **Managing Instances**
+   - Run `./src/manage/ui/ui_restart.sh` to restart UI instance.
+   - Run `./src/manage/ui/ui_start.sh` to start UI instance.
+   - Run `./src/manage/ui/ui_stop.sh` to stop UI instance.
+
+   - Run `./src/manage/webservice/webservice_restart.sh` to restart Webservice instance.
+   - Run `./src/manage/webservice/webservice_start.sh` to start Webservice instance.
+   - Run `./src/manage/webservice/webservice_stop.sh` to stop Webservice instance.
+
+14. **Traffic Manager Setup** [only for Production and Disaster Recovery]
+   - Run `./src/global_resources/setup_traffic_manager.sh` to configure Traffic Manager profiles.
+
+15. **Front door Setup** [only for Production and Disaster Recovery]
+   - Run `./src/global_resources/setup_frontdoor.sh` to configure Front door resource and configure it.
+
+16. **Handling manual Failover** [only for Production and Disaster Recovery]
+   - Run `./src/failover/failover_to_DR.sh` to trigger failover from Prod to DR.
+   - Run `./src/failover/failover_to_Prod.sh` to trigger failover from DR to Prod.
+
+   - Run `./src/failover/test_failover_to_DR.sh` to test the failover from Prod to DR.
+   - Run `./src/failover/test_failover_to_Prod.sh` to test the failover from DR to Prod.
+
+17. **Enable Backups** [only for Production and Disaster Recovery]
+   - Run `./src/backup/enable_auto_backups.sh` to enable schedule backup of azure resources using Azure Backups.
+   - Run `./src/backup/manual_backup_webapp.sh` to trigger a manual backup of webapp using Azure Backups.
+
+## Logging
+
+Logs are managed by the `logging` module in `./src/lib/logging`. Ensuring proper configuration for logging output.
+Logs are created at users home path "~/deploy_webapps/logs/deploy_YYYYMMDD_HHMMSS.log"
+Each run creates a new log file.
+
+## Error Handling
+
+The script intrupts immediately after encountering an error and displays the error on STDOUT and write to log file.
+Error line is of format "script_file line_no. failure message".
+Ensure to check logs for any issues during script execution.
+
+## Observability
+
+Application performance and diagnostics are monitored through Azure Application Insights.
+
 
 ## Directory Structure
 
@@ -138,10 +233,12 @@ A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR
     - **`deploy_app.sh`**
       - Script to deploy the application to the specified environment.
 
-  - **`./src/DR_resources/`**
-    - Scripts for disaster recovery setup.
+  - **`./src/global_resources/`**
+    - Scripts for creating and managing global resources like front door and traffic manager.
     - **`setup_traffic_manager.sh`**
       - Script to configure the traffic manager for disaster recovery scenarios.
+    - **`setup_frontdoor.sh`**
+      - Script to configure the front door for global load balancing.
 
   - **`./src/failover/`**
     - Scripts for handling failovers.
@@ -181,6 +278,8 @@ A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR
         - Azure backup management functions.
       - **`failover/`**
         - Azure failover management functions.
+      - **`frontdoor/`**
+        - Azure front door management functions.
       - **`keyvault/`**
         - Azure Key Vault management functions.
       - **`network/`**
@@ -239,37 +338,4 @@ A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR
         - Update UI service.
       - **`webservice_update.sh`**
         - Update web service.
-
-## Getting Started
-
-1. **Environment Configuration**
-   - Run `./src/create_new_env_configuration.sh` to set up new environment configurations.
-
-2. **Configuration Setup**
-   - Update the configuration files in `./config` as needed for your environments.
-
-3. **Infrastructure Creation**
-   - Run `./src/create_app_infra.sh` to create the necessary Azure infrastructure.
-
-4. **Application Deployment**
-   - Run `./src/deploy_app.sh` to deploy your application. It also configures Application Gateway
-
-5. **Traffic Manager Setup** [only for Production and Disaster Recovery]
-   - Run `./src/setup_traffic_manager.sh` to configure Traffic Manager profiles.
-
-## Logging
-
-Logs are managed by the `logging` module in `./src/lib/logging`. Ensuring proper configuration for logging output.
-Logs are created at users home path "~/deploy_webapps/logs/deploy_YYYYMMDD_HHMMSS.log"
-Each run creates a new log file.
-
-## Error Handling
-
-The script intrupts immediately after encountering an error and displays the error on STDOUT and write to log file.
-Error line is of format "script_file line_no. failure message".
-Ensure to check logs for any issues during script execution.
-
-## Observability
-
-Application performance and diagnostics are monitored through Azure Application Insights.
 
