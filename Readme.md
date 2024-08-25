@@ -5,67 +5,44 @@ and managing environment-specific settings.
 
 ## Features
 
-- **Multi-Environment Support**: Configuration and management for multiple environments (Development, Testing, Production, Disaster Recovery).
-
-- **Azure Resource Management**: Scripts for creating and managing Azure resources, including Application Gateway, Traffic Manager, and Key Vault.
-
-- **Application Deployment**: Automated deployment of Node.js (UI) and Spring Boot (Backend) applications to Azure App Services and Azure Spring Apps Service.
-
-- **Blue-Green Deployment**: The project employs a Blue-Green Deployment model to minimize downtime and reduce risk during application updates. This approach involves maintaining two identical production environments, referred to as "Blue" and "Green."
-The Node.js UI is deployed in two slots on Azure Web App service, and the Java Spring Boot Webservice is deployed in two deployment instances using Azure Spring App service. Blue-Green deployment switching is supported.
-
-- **Environment-Specific Configurations**: Management of environment-specific properties and secrets, with support for encrypted secrets using SOPS and reading and writing secrets to Azure Key Vault Service.
-
-- **Scaling and High Availability**: Functions for scaling applications and ensuring high availability through Traffic Manager profiles and Azure scaling capabilities.
-
-- **Logging and Error Handling**: Comprehensive logging and error handling mechanisms for better visibility and troubleshooting.
-
-- **Traffic Management**: Integration with Azure Traffic Manager for load balancing and failover strategies.
-
-- **Observability**: Integration with Azure Application Insights for monitoring application performance and diagnostics.
-
-- **Disaster Recovery**: A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure seamless failover capability in case of an emergency.
-
-
-
-## Multi-Environment Configuration
+**Multi-Environment Configuration**
 Supports configuration management across multiple environments (dev, test, prod, DR, Perf) with environment-specific properties and secrets, ensuring consistency and isolation of configurations.
 
-## Encrypted Secrets Management
+**Encrypted Secrets Management**
 Utilizes SOPS for managing encrypted secrets, ensuring sensitive information is securely stored and accessible only with proper decryption.
 
-## Infrastructure Automation
+**Infrastructure Automation**
 Automates the creation and configuration of infrastructure components, such as application gateways, network resources, and autoscaling, reducing manual setup and configuration efforts.
 
-## Application Deployment
+**Application Deployment**
 Automated deployment of Node.js (UI) and Spring Boot (Backend) applications to Azure App Services and Azure Spring Apps Service.
 
-## Automated Backup and Failover
+**Automated Backup and Failover**
 Includes scripts for enabling automatic backups, performing manual backups, and managing failovers between production and disaster recovery environments to ensure application resilience and availability.
 
-## Blue-Green Deployment Strategy
+**Blue-Green Deployment Strategy**
 The project employs a Blue-Green Deployment model to minimize downtime and reduce risk during application updates. This approach involves maintaining two identical production environments, referred to as "Blue" and "Green."
 The Node.js UI is deployed in two slots on Azure Web App service, and the Java Spring Boot Webservice is deployed in two deployment instances using Azure Spring App service. Blue-Green deployment switching is supported.
 
-## Monitoring and Alerting
+**Monitoring and Alerting**
 Features scripts to enable monitoring and alerting, ensuring timely detection of issues and proactive management of application performance and health.
 
-## Auto Scaling and High Availability
+**Auto Scaling and High Availability**
 Provides scripts for scaling applications, including autoscaling capabilities to handle varying loads and maintain performance.
 
-## UI and Web Service Management
+**UI and Web Service Management**
 Contains scripts for managing UI and web service operations, including starting, stopping, restarting, and updating services, simplifying maintenance and operational tasks.
 
-## Template-Based Environment Creation
+**Template-Based Environment Creation**
 Offers templates for creating new environment configurations, allowing for quick setup of new environments with predefined settings and properties.
 
-## Library of Azure Functions
+**Library of Azure Functions**
 Includes a comprehensive set of libraries for interacting with Azure services, such as app gateway, key vault, and traffic manager, streamlining Azure resource management.
 
-## Detailed Logging and Initialization
+**Detailed Logging and Initialization**
 Provides logging utilities and initialization scripts to ensure proper setup and monitoring of application and infrastructure components.
 
-## Failover Mechanism Using Azure Traffic Manager for Disaster recovery
+**Failover Mechanism Using Azure Traffic Manager for Disaster recovery**
 Features a failover mechanism leveraging Azure Traffic Manager to ensure high availability between Production and Disaster Recovery (DR) environments. Traffic Manager routes traffic based on configured policies and health checks, enabling seamless failover from Prod to DR in case of a failure. Includes scripts for configuring Traffic Manager profiles and managing traffic routing between environments to maintain service continuity and minimize downtime.
 
 A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure seamless failover capability in case of an emergency.
