@@ -19,11 +19,6 @@ check_and_create_key_vault
 # and add its access key to the keyvault
 create_storage_account_and_store_in_keyvault
 
-# check if app_insights is enabled for the environment 
-# if yes then check app-insight instance is deployed
-# if not the create it
-check_and_create_app_insights
-
 # checking if required subnets exist, if not create them
 # We are using seperate subnets for webservice, webservice runtime, UI and Application Gateway
 check_and_create_subnet $WEBSERVICE_SUBNET_NAME $WEBSERVICE_SUBNET_PREFIX

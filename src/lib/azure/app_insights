@@ -25,3 +25,216 @@ check_and_create_app_insights() {
     fi
 }
 
+# Function to configure Application Insights for a Web App
+configure_app_insights_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local app_insights_name=$APP_INSIGHTS_NAME
+
+    logger "INFO" "Configuring Application Insights for Web App: $webapp_name in Resource Group: $resource_group..."
+
+    # Get the Application Insights instrumentation key
+    local instrumentation_key=$(az monitor app-insights component show --resource-group "$resource_group" --name "$app_insights_name" --query instrumentationKey --output tsv)
+    if [ $? -ne 0 ] || [ -z "$instrumentation_key" ]; then
+        logger "ERROR" "Failed to retrieve instrumentation key for Application Insights: $app_insights_name"
+        return 1
+    fi
+
+    # Configure Application Insights for the Web App
+    az webapp config appsettings set --resource-group "$resource_group" --name "$webapp_name" --settings "APPLICATIONINSIGHTS_CONNECTION_STRING=InstrumentationKey=$instrumentation_key"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to configure Application Insights for Web App: $webapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Application Insights configured successfully for Web App: $webapp_name."
+    return 0
+}
+
+# Function to configure Application Insights for a Spring App
+configure_app_insights_spring_app() {
+    local resource_group=$RESOURCE_GROUP
+    local springapp_name=$SPRING_APP_NAME
+    local app_insights_name=$APP_INSIGHTS_NAME
+
+    logger "INFO" "Configuring Application Insights for Spring App: $springapp_name in Resource Group: $resource_group..."
+
+    # Get the Application Insights instrumentation key
+    local instrumentation_key=$(az monitor app-insights component show --resource-group "$resource_group" --name "$app_insights_name" --query instrumentationKey --output tsv)
+    if [ $? -ne 0 ] || [ -z "$instrumentation_key" ]; then
+        logger "ERROR" "Failed to retrieve instrumentation key for Application Insights: $app_insights_name"
+        return 1
+    fi
+
+    # Configure Application Insights for the Spring App
+    az spring app update --name "$springapp_name" --resource-group "$resource_group" --set properties["applicationInsights.instrumentationKey"]="$instrumentation_key"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to configure Application Insights for Spring App: $springapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Application Insights configured successfully for Spring App: $springapp_name."
+    return 0
+}
+
+# Function to create an action group
+create_action_group() {
+    local resource_group=$RESOURCE_GROUP
+    local action_group_name=$ACTION_GROUP_NAME
+    local email_receiver=$EMAIL_RECEIVER
+    local sms_receiver=$SMS_RECEIVER_PHONE_NUMBER
+    local sms_country_code=$SMS_RECEIVER_COUNTRY_CODE
+
+    logger "INFO" "Creating action group: $action_group_name in Resource Group: $resource_group..."
+
+    # Create Action Group
+    az monitor action-group create --name "$action_group_name" \
+        --resource-group "$resource_group" \
+        --short-name "$action_group_name" \
+        --email-receiver name="EmailReceiver" email="$email_receiver" \
+        --sms-receiver name="SMSReceiver" country-code="$sms_country_code" phone-number="$sms_receiver"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create action group: $action_group_name"
+        return 1
+    fi
+
+    logger "INFO" "Action group $action_group_name created successfully."
+    return 0
+}
+
+
+# Function to create a CPU alert rule for a Web App
+create_cpu_alert_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local alert_name=$WEBAPP_CPU_ALERT_NAME
+    local action_group=$ACTION_GROUP_NAME
+    local cpu_threshold=$WEBAPP_CPU_THRESHOLD
+
+    logger "INFO" "Creating CPU alert rule for Web App: $webapp_name in Resource Group: $resource_group..."
+
+    # Get the resource ID of the Web App
+    local resource_id=$(az webapp show --resource-group "$resource_group" --name "$webapp_name" --query id --output tsv)
+    if [ $? -ne 0 ] || [ -z "$resource_id" ]; then
+        logger "ERROR" "Failed to retrieve resource ID for Web App: $webapp_name"
+        return 1
+    fi
+
+    # Create CPU alert rule
+    az monitor metrics alert create --name "${alert_name}-CPU" \
+        --resource-group "$resource_group" --scopes "$resource_id" \
+        --condition "avg Percentage CPU > $cpu_threshold" \
+        --description "High CPU Alert for Web App: $webapp_name" \
+        --action-group "$action_group"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create CPU alert rule for Web App: $webapp_name"
+        return 1
+    fi
+
+    logger "INFO" "CPU alert rule created successfully for Web App: $webapp_name."
+    return 0
+}
+
+# Function to create a Memory alert rule for a Web App
+create_memory_alert_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local alert_name=$WEBAPP_MEMORY_ALERT_NAME
+    local action_group=$ACTION_GROUP_NAME
+    local memory_threshold=$WEBAPP_MEMORY_THRESHOLD
+
+    logger "INFO" "Creating Memory alert rule for Web App: $webapp_name in Resource Group: $resource_group..."
+
+    # Get the resource ID of the Web App
+    local resource_id=$(az webapp show --resource-group "$resource_group" --name "$webapp_name" --query id --output tsv)
+    if [ $? -ne 0 ] || [ -z "$resource_id" ]; then
+        logger "ERROR" "Failed to retrieve resource ID for Web App: $webapp_name"
+        return 1
+    fi
+
+    # Create Memory alert rule
+    az monitor metrics alert create --name "${alert_name}-Memory" \
+        --resource-group "$resource_group" --scopes "$resource_id" \
+        --condition "avg Memory Working Set > $memory_threshold" \
+        --description "High Memory Alert for Web App: $webapp_name" \
+        --action-group "$action_group"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create Memory alert rule for Web App: $webapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Memory alert rule created successfully for Web App: $webapp_name."
+    return 0
+}
+
+# Function to create a CPU alert rule for a Spring App
+create_cpu_alert_spring_app() {
+    local resource_group=$RESOURCE_GROUP
+    local springapp_name=$SPRING_APP_NAME
+    local alert_name=$SPRING_APP_CPU_ALERT_NAME
+    local action_group=$ACTION_GROUP_NAME
+    local cpu_threshold=$SPRING_APP_CPU_THRESHOLD
+
+    logger "INFO" "Creating CPU alert rule for Spring App: $springapp_name in Resource Group: $resource_group..."
+
+    # Get the resource ID of the Spring App
+    local resource_id=$(az spring-cloud app show --resource-group "$resource_group" --service "$springapp_name" --name "$springapp_name" --query id --output tsv)
+    if [ $? -ne 0 ] || [ -z "$resource_id" ]; then
+        logger "ERROR" "Failed to retrieve resource ID for Spring App: $springapp_name"
+        return 1
+    fi
+
+    # Create CPU alert rule
+    az monitor metrics alert create --name "${alert_name}-CPU" \
+        --resource-group "$resource_group" --scopes "$resource_id" \
+        --condition "avg CpuUsage > $cpu_threshold" \
+        --description "High CPU Alert for Spring App: $springapp_name" \
+        --action-group "$action_group"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create CPU alert rule for Spring App: $springapp_name"
+        return 1
+    fi
+
+    logger "INFO" "CPU alert rule created successfully for Spring App: $springapp_name."
+    return 0
+}
+
+# Function to create a Memory alert rule for a Spring App
+create_memory_alert_spring_app() {
+    local resource_group=$RESOURCE_GROUP
+    local springapp_name=$SPRING_APP_NAME
+    local alert_name=$SPRING_APP_MEMORY_ALERT_NAME
+    local action_group=$ACTION_GROUP_NAME
+    local memory_threshold=$SPRING_APP_MEMORY_THRESHOLD
+
+    logger "INFO" "Creating Memory alert rule for Spring App: $springapp_name in Resource Group: $resource_group..."
+
+    # Get the resource ID of the Spring App
+    local resource_id=$(az spring-cloud app show --resource-group "$resource_group" --service "$springapp_name" --name "$springapp_name" --query id --output tsv)
+    if [ $? -ne 0 ] || [ -z "$resource_id" ]; then
+        logger "ERROR" "Failed to retrieve resource ID for Spring App: $springapp_name"
+        return 1
+    fi
+
+    # Create Memory alert rule
+    az monitor metrics alert create --name "${alert_name}-Memory" \
+        --resource-group "$resource_group" --scopes "$resource_id" \
+        --condition "avg MemoryUsage > $memory_threshold" \
+        --description "High Memory Alert for Spring App: $springapp_name" \
+        --action-group "$action_group"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create Memory alert rule for Spring App: $springapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Memory alert rule created successfully for Spring App: $springapp_name."
+    return 0
+}
+
