@@ -34,7 +34,7 @@ create_traffic_manager_profile() {
 # Function to add traffic manager endpoint
 add_traffic_manager_endpoint() {
     local profile_name=$TRAFFIC_MANAGER_PROFILE
-    local resource_group=$RESOURCE_GROUP
+    local resource_group=$TRAFFIC_MANAGER_RESOURCE_GROUP
     local endpoint_name=$1
     local target=$2
     local priority=$3
@@ -59,7 +59,7 @@ add_traffic_manager_endpoint() {
 # Function to update traffic manager health probes
 update_traffic_manager_health_probes() {
     local profile_name=$TRAFFIC_MANAGER_PROFILE
-    local resource_group=$RESOURCE_GROUP
+    local resource_group=$TRAFFIC_MANAGER_RESOURCE_GROUP
     local path=$1
     local port=$2
 

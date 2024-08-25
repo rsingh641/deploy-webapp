@@ -42,32 +42,14 @@ check_and_create_app_service_plan
 logger "INFO" "Check and Create UI Webapp instance for [$ENV]"
 check_and_create_webapp
 
-# Create NSGs
-logger "INFO" "Creating NSG for Webapp"
-create_nsg $RESOURCE_GROUP $WEBAPP_NSG_NAME $LOCATION
-
-logger "INFO" "Creating NSG for Webservice"
-create_nsg $RESOURCE_GROUP $SPRING_APP_NSG_NAME $LOCATION
-
-# Associate NSGs with subnets
-logger "INFO" "Associating NSG with Webapp subnet $WEBAPP_SUBNET_NAME"
-associate_nsg_with_subnet $RESOURCE_GROUP $WEBAPP_NSG_NAME $WEBAPP_VNET $WEBAPP_SUBNET_NAME
-
-logger "INFO" "Associating NSG with Webservice subnet $WEBSERVICE_SUBNET_NAME"
-associate_nsg_with_subnet $RESOURCE_GROUP $SPRING_APP_NSG_NAME $SPRING_APP_VNET $WEBSERVICE_SUBNET_NAME
-
-# Example rule for allowing HTTP traffic on port 80
-logger "INFO" "Create NSG rule in $WEBAPP_NSG_NAME to allow traffic"
-create_nsg_rule $RESOURCE_GROUP $WEBAPP_NSG_NAME "Allow-HTTP" 100 "Inbound" "Allow" "Tcp" "*" "80" "*" "*"
-
-logger "INFO" "Create NSG rule in $SPRING_APP_NSG_NAME to allow traffic"
-create_nsg_rule $RESOURCE_GROUP $SPRING_APP_NSG_NAME "Allow-HTTP" 100 "Inbound" "Allow" "Tcp" "*" "80" "*" "*"
-
-logger "INFO" "NSG creation and subnet association completed."
-
-
 logger "INFO" "Creating application Gateway"
 create_application_gateway 
+
+logger "INFO" "Uploading DB2 certs to Keyvault"
+upload_db2_certs_to_key_vault
+
+logger "INFO" "uploading Oracle credentials to Keyvault"
+store_oracle_creds_in_key_vault
 
 logger "INFO" "Application Infra creation completed successfully for [$ENV]"
 

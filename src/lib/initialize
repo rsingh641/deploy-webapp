@@ -23,6 +23,7 @@ source ${UI_PROPERTIES}
 source ${WEBSERVICE_PROPERTIES}
 
 source src/lib/azure/az_lib
+source src/lib/azure/keyvault
 
 check_az_cli
 
@@ -31,3 +32,6 @@ az_login
 
 logger "INFO" "Reading secrets from local encrypted file"
 fetch_secrets $SECRETS_FILE
+
+logger "INFO" "Loading secrets from Azure Kevvault"
+load_secrets_from_keyvault

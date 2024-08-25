@@ -66,6 +66,49 @@ scale_spring_app() {
     fi
 }
 
+#!/bin/bash
+
+# Logger function
+logger() {
+    local level=$1
+    local message=$2
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $level - $message"
+}
+
+# Function to create or update a deployment in Azure Spring App
+create_spring_app_deployment() {
+    local resource_group=$RESOURCE_GROUP
+    local spring_service_name=$SPRING_APP_SERVICE_NAME
+    local spring_app_name=$SPRING_APP_NAME
+    local deployment_name=$1
+    local runtime_version=$SPRING_APP_RUNTIME_VERSION
+    local cpu=$SPRING_APP_CPU
+    local memory=$SPRING_APP_MEMORY
+    local instance_count=$SPRING_APP_INSTANCE_COUNT
+
+    logger "INFO" "Creating deployment: $deployment_name for Spring App: $spring_app_name in Resource Group: $resource_group..."
+
+    az spring app deployment create \
+        --resource-group "$resource_group" \
+        --service "$spring_service_name" \
+        --app "$spring_app_name" \
+        --name "$deployment_name" \
+        --artifact-path "$jar_file_url" \
+        --cpu "$cpu" \
+        --memory "$memory" \
+        --instance-count "$instance_count" \
+        --runtime-version "$runtime_version"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create deployment: $deployment_name for Spring App: $spring_app_name"
+        return 1
+    fi
+
+    logger "INFO" "Deployment $deployment_name created successfully for Spring App: $spring_app_name."
+    return 0
+}
+
+
 # Function to switch webservice between green-blue deployment
 switch_webservice_deployment() {
     local deployment_name=$SPRING_APP_DEPLOYMENT_NAME

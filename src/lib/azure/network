@@ -95,39 +95,39 @@ create_nsg_rule() {
     logger "INFO" "NSG rule $rule_name created successfully in NSG $nsg_name."
 }
 
-create_nsg_rule() {
-    local resource_group=$1
-    local nsg_name=$2
-    local rule_name=$3
-    local priority=$4
-    local direction=$5
-    local access=$6
-    local protocol=$7
-    local source_port_range=$8
-    local destination_port_range=$9
-    local source_address_prefix=${10}
-    local destination_address_prefix=${11}
+# create_nsg_rule() {
+#     local resource_group=$1
+#     local nsg_name=$2
+#     local rule_name=$3
+#     local priority=$4
+#     local direction=$5
+#     local access=$6
+#     local protocol=$7
+#     local source_port_range=$8
+#     local destination_port_range=$9
+#     local source_address_prefix=${10}
+#     local destination_address_prefix=${11}
 
-    logger "INFO" "Creating NSG rule $rule_name in NSG $nsg_name..."
+#     logger "INFO" "Creating NSG rule $rule_name in NSG $nsg_name..."
 
-    az network nsg rule create --resource-group $resource_group \
-                               --nsg-name $nsg_name \
-                               --name $rule_name \
-                               --priority $priority \
-                               --direction $direction \
-                               --access $access \
-                               --protocol $protocol \
-                               --source-port-ranges $source_port_range \
-                               --destination-port-ranges $destination_port_range \
-                               --source-address-prefixes $source_address_prefix \
-                               --destination-address-prefixes $destination_address_prefix
+#     az network nsg rule create --resource-group $resource_group \
+#                                --nsg-name $nsg_name \
+#                                --name $rule_name \
+#                                --priority $priority \
+#                                --direction $direction \
+#                                --access $access \
+#                                --protocol $protocol \
+#                                --source-port-ranges $source_port_range \
+#                                --destination-port-ranges $destination_port_range \
+#                                --source-address-prefixes $source_address_prefix \
+#                                --destination-address-prefixes $destination_address_prefix
 
-    if [ $? -ne 0 ]; then
-        logger "ERROR" "Failed to create NSG rule $rule_name in NSG $nsg_name."
-        exit 1
-    fi
+#     if [ $? -ne 0 ]; then
+#         logger "ERROR" "Failed to create NSG rule $rule_name in NSG $nsg_name."
+#         exit 1
+#     fi
 
-    logger "INFO" "Successfully created NSG rule $rule_name in NSG $nsg_name."
-}
+#     logger "INFO" "Successfully created NSG rule $rule_name in NSG $nsg_name."
+# }
 
 
