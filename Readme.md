@@ -6,15 +6,24 @@ and managing environment-specific settings.
 ## Features
 
 - **Multi-Environment Support**: Configuration and management for multiple environments (Development, Testing, Production, Disaster Recovery).
+
 - **Azure Resource Management**: Scripts for creating and managing Azure resources, including Application Gateway, Traffic Manager, and Key Vault.
+
 - **Application Deployment**: Automated deployment of Node.js (UI) and Spring Boot (Backend) applications to Azure App Services and Azure Spring Apps Service.
+
 - **Blue-Green Deployment**: The project employs a Blue-Green Deployment model to minimize downtime and reduce risk during application updates. This approach involves maintaining two identical production environments, referred to as "Blue" and "Green."
 The Node.js UI is deployed in two slots on Azure Web App service, and the Java Spring Boot Webservice is deployed in two deployment instances using Azure Spring App service. Blue-Green deployment switching is supported.
+
 - **Environment-Specific Configurations**: Management of environment-specific properties and secrets, with support for encrypted secrets using SOPS and reading and writing secrets to Azure Key Vault Service.
+
 - **Scaling and High Availability**: Functions for scaling applications and ensuring high availability through Traffic Manager profiles and Azure scaling capabilities.
+
 - **Logging and Error Handling**: Comprehensive logging and error handling mechanisms for better visibility and troubleshooting.
+
 - **Traffic Management**: Integration with Azure Traffic Manager for load balancing and failover strategies.
+
 - **Observability**: Integration with Azure Application Insights for monitoring application performance and diagnostics.
+
 - **Disaster Recovery**: A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure seamless failover capability in case of an emergency.
 
 ## Directory Structure
@@ -79,19 +88,19 @@ Scripts and source code for managing infrastructure and deployments.
 
 ## Getting Started
 
-1. **Configuration Setup**
-   - Update the configuration files in `./config` as needed for your environments.
-
-2. **Infrastructure Creation**
-   - Run `./src/create_app_infra.sh` to create the necessary Azure infrastructure.
-
-3. **Environment Configuration**
+1. **Environment Configuration**
    - Run `./src/create_new_env_configuration.sh` to set up new environment configurations.
 
-4. **Application Deployment**
-   - Run `./src/deploy_app.sh` to deploy your application.
+2. **Configuration Setup**
+   - Update the configuration files in `./config` as needed for your environments.
 
-5. **Traffic Manager Setup**
+3. **Infrastructure Creation**
+   - Run `./src/create_app_infra.sh` to create the necessary Azure infrastructure.
+
+4. **Application Deployment**
+   - Run `./src/deploy_app.sh` to deploy your application. It also configures Application Gateway
+
+5. **Traffic Manager Setup** [only for Production and Disaster Recovery]
    - Run `./src/setup_traffic_manager.sh` to configure Traffic Manager profiles.
 
 ## Logging
