@@ -65,7 +65,7 @@ seamless failover capability in case of an emergency.
    - Run `./src/infra/create_app_infra.sh` to create the necessary Azure infrastructure.
 
 4. **Application Gateway Creation**
-   - Run `./src/infra/create_app_infra.sh` to create the necessary Azure infrastructure.
+   - Run `./src/infra/configure_app_gateway.sh` to create the Application gateway.
 
 5. **Network Resources Creation**
    - Run `./src/infra/setup_network_resources.sh` to create the necessary Network components in Azure infrastructure.
