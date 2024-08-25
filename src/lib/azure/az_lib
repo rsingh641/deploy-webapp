@@ -70,29 +70,6 @@ check_az_cli() {
     az config set extension.use_dynamic_install=yes_without_prompt
 }
 
-# check and create app insights
-check_and_create_app_insights() {
-    # Check if the Application Insights instance exists
-    logger "INFO" "Checking if Application Insights instance '$APP_INSIGHTS_NAME' exists in resource group '$RESOURCE_GROUP'..."
-    if az monitor app-insights component show --resource-group "$RESOURCE_GROUP" --app "$APP_INSIGHTS_NAME" > /dev/null 2>&1; then
-        logger "INFO" "Application Insights instance '$APP_INSIGHTS_NAME' already exists."
-    else
-        # Check if we need to create the Application Insights instance
-        if [[ "$ENABLE_APP_INSIGHTS" == "true" ]]; then
-            logger "INFO" "Application Insights instance '$APP_INSIGHTS_NAME' does not exist. Creating it..."
-            az monitor app-insights component create --app "$APP_INSIGHTS_NAME" --location "$LOCATION" --resource-group "$RESOURCE_GROUP" --kind web
-            if [[ $? -eq 0 ]]; then
-                logger "INFO" "Application Insights instance '$APP_INSIGHTS_NAME' created successfully."
-            else
-                logger "ERROR" "Failed to create Application Insights instance '$APP_INSIGHTS_NAME'."
-                exit 1
-            fi
-        else
-            logger "INFO" "Application Insights instance '$APP_INSIGHTS_NAME' does not exist and 'ENABLE_APP_INSIGHTS' flag is not set to true. Skipping creation."
-        fi
-    fi
-}
-
 # Function to check and create a resource group if it doesn't already exist
 check_and_create_resource_group() {
     local RESOURCE_GROUP_NAME=$1
