@@ -7,3 +7,4 @@ source src/lib/ui/ui_manage
 
 update_app_service_plan
 
+update_webapp

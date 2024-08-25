@@ -46,6 +46,37 @@ update_app_service_plan() {
     return 0
 }
 
+# Function to update an Azure Web App
+update_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local app_name=$WEBAPP_NAME
+
+    # Initialize az command
+    az_command="az webapp update --name $app_name --resource-group $resource_group"
+
+    # Optional parameters
+    [ -n "$WEBAPP_BASIC_AUTH" ] && az_command+=" --basic-auth $APP_BASIC_AUTH"
+    [ -n "$WEBAPP_CLIENT_AFFINITY_ENABLED" ] && az_command+=" --client-affinity-enabled $APP_CLIENT_AFFINITY_ENABLED"
+    [ -n "$WEBAPP_FORCE_DNS_REGISTRATION" ] && az_command+=" --force-dns-registration $APP_FORCE_DNS_REGISTRATION"
+    [ -n "$WEBAPP_HTTPS_ONLY" ] && az_command+=" --https-only $APP_HTTPS_ONLY"
+    [ -n "$WEBAPP_MINIMUM_ELASTIC_INSTANCE_COUNT" ] && az_command+=" --minimum-elastic-instance-count $APP_MINIMUM_ELASTIC_INSTANCE_COUNT"
+    [ -n "$WEBAPP_PREWARMED_INSTANCE_COUNT" ] && az_command+=" --prewarmed-instance-count $APP_PREWARMED_INSTANCE_COUNT"
+    [ -n "$WEBAPP_SKIP_CUSTOM_DOMAIN_VERIFICATION" ] && az_command+=" --skip-custom-domain-verification $APP_SKIP_CUSTOM_DOMAIN_VERIFICATION"
+    [ -n "$WEBAPP_SKIP_DNS_REGISTRATION" ] && az_command+=" --skip-dns-registration $APP_SKIP_DNS_REGISTRATION"
+    [ -n "$WEBAPP_TTL_IN_SECONDS" ] && az_command+=" --ttl-in-seconds $APP_TTL_IN_SECONDS"
+    [ -n "$WEBAPP_SLOT" ] && az_command+=" --slot $APP_SLOT"
+
+    # Execute the command
+    logger "DEBUG" "Running command: $az_command"
+    eval "$az_command"
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update the Web App '$app_name'."
+        exit 1
+    fi
+
+    logger "INFO" "Successfully updated the Web App '$app_name'."
+}
+
 # Function to restart an Azure WebApp
 restart_webapp() {
     local resource_group=$RESOURCE_GROUP
@@ -153,3 +184,4 @@ swap_slots() {
     logger "INFO" "Successfully swapped slots: $source_slot with $target_slot."
     return 0
 }
+
