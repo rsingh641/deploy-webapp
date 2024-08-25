@@ -36,6 +36,12 @@ check_and_create_spring_service_instance
 logger "INFO" "Check and Create Spring app instance for [$ENV]"
 check_and_create_spring_app_instance
 
+logger "INFO" "Adding storage account to Spring app instance for [$ENV]"
+add_storage_to_spring_app
+
+logger "INFO" "Integrating Spring app instance with vnet for [$ENV]"
+integrate_webapp_with_vnet
+
 logger "INFO" "Check and Create UI Webapp service plan for [$ENV]"
 check_and_create_app_service_plan
 

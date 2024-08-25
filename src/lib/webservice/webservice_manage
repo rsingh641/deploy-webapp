@@ -66,15 +66,6 @@ scale_spring_app() {
     fi
 }
 
-#!/bin/bash
-
-# Logger function
-logger() {
-    local level=$1
-    local message=$2
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $level - $message"
-}
-
 # Function to create or update a deployment in Azure Spring App
 create_spring_app_deployment() {
     local resource_group=$RESOURCE_GROUP
@@ -175,6 +166,40 @@ stop_webservice() {
         logger "ERROR" "Failed to stop Spring Boot app: $app_name" >&2
         exit 1
     fi
+}
+
+# Function to restart an Azure Spring App
+restart_spring_app() {
+    local resource_group=$RESOURCE_GROUP
+    local spring_service_name=$SPRING_APP_SERVICE_NAME
+    local spring_app_name=$SPRING_APP_NAME
+    local deployment_name=$SPRING_APP_DEPLOYMENT_NAME
+    local no_wait=$SPRING_APP_NO_WAIT
+
+    logger "INFO" "Restarting Spring App: $spring_app_name in Resource Group: $resource_group..."
+
+    if [ -z "$deployment_name" ]; then
+        az spring app restart \
+            --name "$spring_app_name" \
+            --resource-group "$resource_group" \
+            --service "$spring_service_name" \
+            --no-wait "$no_wait"
+    else
+        az spring app restart \
+            --name "$spring_app_name" \
+            --resource-group "$resource_group" \
+            --service "$spring_service_name" \
+            --deployment "$deployment_name" \
+            --no-wait "$no_wait"
+    fi
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to restart Spring App: $spring_app_name"
+        return 1
+    fi
+
+    logger "INFO" "Spring App $spring_app_name restarted successfully."
+    return 0
 }
 
 unset_webservice_deployment() {

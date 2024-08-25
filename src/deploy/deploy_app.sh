@@ -3,6 +3,8 @@
 set -e
 
 source src/lib/initialize
+source src/lib/webservice/webservice_app_deploy
+source src/lib/ui/ui_app_deploy
 
 logger "INFO" "Starting to deploy the application in ${ENV}"
 
