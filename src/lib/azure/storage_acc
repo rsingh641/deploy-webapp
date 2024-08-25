@@ -1,0 +1,65 @@
+#! /bin/bash
+
+set -e
+
+# Internal function to create a new storage account
+_create_storage_account() {
+    local resource_group=$1
+    local storage_account_name=$2
+    local location=$3
+
+    # Check if the storage account already exists
+    local account_not_exists=$(az storage account check-name --name $storage_account_name --query 'nameAvailable' --output tsv)
+
+    if [ "$account_not_exists" == "false" ]; then
+        logger "INFO" "Storage account $storage_account_name already exists. Skipping creation."
+        return 0
+    fi
+
+    # Create the storage account
+    logger "INFO" "Creating storage account: $storage_account_name"
+    az storage account create --name $storage_account_name \
+                             --resource-group $resource_group \
+                             --location $location \
+                             --sku Standard_LRS \
+                             --kind StorageV2
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create storage account: $storage_account_name" >&2
+        exit 1
+    fi
+
+    logger "INFO" "Storage account $storage_account_name created successfully."
+}
+
+# Internal function to get storage account keys
+_get_storage_account_key() {
+    local resource_group=$1
+    local storage_account_name=$2
+
+    # Retrieve the storage account keys
+    local keys=$(az storage account keys list --resource-group $resource_group \
+                                              --account-name $storage_account_name \
+                                              --query '[0].{key: value}' \
+                                              --output tsv)
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to retrieve storage account keys for: $storage_account_name" >&2
+        exit 1
+    fi
+
+    logger "INFO" "Retrieved storage account key successfully."
+    echo "$keys"
+}
+
+# Create a new storage account and store its keys in the key vault
+create_storage_account_and_store_in_keyvault() {
+    local resource_group=$RESOURCE_GROUP
+    local storage_account_name=$STORAGE_ACCOUNT
+    local key_vault_name=$KEYVAULT_NAME
+    local location=$LOCATION
+
+    _create_storage_account "$resource_group" "$storage_account_name" "$location"
+    local storage_account_key=$(_get_storage_account_key "$resource_group" "$storage_account_name")
+    store_storage_acc_secrets_in_keyvault "$key_vault_name" "$storage_account_name" "$storage_account_key"
+}

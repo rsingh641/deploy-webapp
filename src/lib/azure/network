@@ -1,0 +1,133 @@
+#! /bin/bash
+
+set -e
+
+# Check and create subnets
+check_and_create_subnet() {
+    local $subnet_name=$1
+    local $subnet_prefix=$2
+
+    # Check if the VNet exists
+    # Check if the webservice subnet exists
+    logger "INFO" "Checking if subnet '$subnet_name' exists in VNet '$VNET_NAME'..."
+    if az network vnet subnet show --resource-group "$RESOURCE_GROUP" --vnet-name "$VNET_NAME" --name "$subnet_name" > /dev/null 2>&1; then
+        logger "INFO" "Subnet '$subnet_name' already exists."
+    else
+        # Create the subnet if it is allowed
+        if [[ "$ENABLE_SUBNET_CREATION" == "true" ]]; then
+            logger "INFO" "Subnet '$subnet_name' does not exist. Creating it..."
+            az network vnet subnet create --resource-group "$RESOURCE_GROUP" --vnet-name "$VNET_NAME" \
+            --address-prefixes "$subnet_prefix" --name "$subnet_name"
+            if [[ $? -eq 0 ]]; then
+                logger "INFO" "Subnet '$subnet_name' created successfully."
+            else
+                logger "ERROR" "Failed to create subnet '$subnet_name'."
+                exit 1
+            fi
+        else
+            logger "INFO" "Subnet '$subnet_name' does not exist and 'ENABLE_SUBNET_CREATION' flag is not set to true. Skipping creation."
+        fi
+    fi
+}
+
+# Function to create Network security group
+create_nsg() {
+    local resource_group=$1
+    local nsg_name=$2
+    local location=$3
+
+    logger "INFO" "Creating Network Security Group (NSG) $nsg_name in resource group $resource_group..."
+
+    az network nsg create --resource-group $resource_group \
+                          --name $nsg_name \
+                          --location $location
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create Network Security Group $nsg_name."
+        exit 1
+    fi
+
+    logger "INFO" "Successfully created Network Security Group $nsg_name."
+}
+
+# Function to Associate NSG with a Subnet
+associate_nsg_with_subnet() {
+    local resource_group=$1
+    local nsg_name=$2
+    local vnet_name=$3
+    local subnet_name=$4
+
+    logger "INFO" "Associating NSG $nsg_name with subnet $subnet_name in VNet $vnet_name..."
+
+    az network vnet subnet update --resource-group $resource_group \
+                                  --vnet-name $vnet_name \
+                                  --name $subnet_name \
+                                  --network-security-group $nsg_name
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to associate NSG $nsg_name with subnet $subnet_name in VNet $vnet_name."
+        exit 1
+    fi
+
+    logger "INFO" "Successfully associated NSG $nsg_name with subnet $subnet_name in VNet $vnet_name."
+}
+
+create_nsg_rule() {
+    local nsg_name=$NSG_NAME
+    local resource_group=$RESOURCE_GROUP
+    local rule_name=$3
+    local priority=$4
+    local source_address_prefix=$5
+    local destination_address_prefix=$6
+    local destination_port_range=$7
+
+    logger "INFO" "Creating NSG rule $rule_name in NSG $nsg_name..."
+    az network nsg rule create --resource-group $resource_group --nsg-name $nsg_name --name $rule_name \
+        --priority $priority --source-address-prefix $source_address_prefix \
+        --destination-address-prefix $destination_address_prefix --destination-port-range $destination_port_range \
+        --access Allow --protocol Tcp --direction Inbound
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create NSG rule $rule_name in NSG $nsg_name."
+        exit 1
+    fi
+
+    logger "INFO" "NSG rule $rule_name created successfully in NSG $nsg_name."
+}
+
+create_nsg_rule() {
+    local resource_group=$1
+    local nsg_name=$2
+    local rule_name=$3
+    local priority=$4
+    local direction=$5
+    local access=$6
+    local protocol=$7
+    local source_port_range=$8
+    local destination_port_range=$9
+    local source_address_prefix=${10}
+    local destination_address_prefix=${11}
+
+    logger "INFO" "Creating NSG rule $rule_name in NSG $nsg_name..."
+
+    az network nsg rule create --resource-group $resource_group \
+                               --nsg-name $nsg_name \
+                               --name $rule_name \
+                               --priority $priority \
+                               --direction $direction \
+                               --access $access \
+                               --protocol $protocol \
+                               --source-port-ranges $source_port_range \
+                               --destination-port-ranges $destination_port_range \
+                               --source-address-prefixes $source_address_prefix \
+                               --destination-address-prefixes $destination_address_prefix
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create NSG rule $rule_name in NSG $nsg_name."
+        exit 1
+    fi
+
+    logger "INFO" "Successfully created NSG rule $rule_name in NSG $nsg_name."
+}
+
+
