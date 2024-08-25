@@ -1,0 +1,115 @@
+#! /bin/bash
+
+set -e
+
+# Function to enable autoscaling for a Web App
+enable_autoscale_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local autoscale_name=$WEBAPP_AUTOSCALE_NAME
+    local min_count=$WEBAPP_AUTOSCALE_MIN_COUNT
+    local max_count=$WEBAPP_AUTOSCALE_MAX_COUNT
+    local count=$WEBAPP_AUTOSCALE_COUNT
+
+    logger "INFO" "Enabling autoscaling for Web App: $webapp_name in Resource Group: $resource_group..."
+
+    az monitor autoscale create --resource-group "$resource_group" \
+        --resource "$webapp_name" --resource-type Microsoft.Web/sites \
+        --name "$autoscale_name" --min-count "$min_count" --max-count "$max_count" --count "$count"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to enable autoscaling for Web App: $webapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Autoscaling enabled for Web App: $webapp_name."
+    return 0
+}
+
+# Function to enable autoscaling for a Spring App
+enable_autoscale_spring_app() {
+    local resource_group=$RESOURCE_GROUP_NAME
+    local springapp_name=$SPRING_APP_NAME
+    local autoscale_name=$SPRING_APP_AUTOSCALE_NAME
+    local min_count=$SPRING_APP_AUTOSCALE_MIN_COUNT
+    local max_count=$SPRING_APP_AUTOSCALE_MAX_COUNT
+    local count=$SPRING_APP_AUTOSCALE_COUNT
+
+    logger "INFO" "Enabling autoscaling for Spring App: $springapp_name in Resource Group: $resource_group..."
+
+    az monitor autoscale create --resource-group "$resource_group" \
+        --resource "$springapp_name" --resource-type Microsoft.AppPlatform/Spring \
+        --name "$autoscale_name" --min-count "$min_count" --max-count "$max_count" --count "$count"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to enable autoscaling for Spring App: $springapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Autoscaling enabled for Spring App: $springapp_name."
+    return 0
+}
+
+# Function to setup custom autoscaling for a Web App
+configure_metric_rule_autoscale_webapp() {
+    local resource_group=$RESOURCE_GROUP_NAME
+    local webapp_name=$WEBAPP_NAME
+    local autoscale_name=$WEBAPP_AUTOSCALE_NAME
+    local min_count=$WEBAPP_AUTOSCALE_MIN_COUNT
+    local max_count=$WEBAPP_AUTOSCALE_MAX_COUNT
+    local count=$WEBAPP_AUTOSCALE_COUNT
+    local metric_name=$WEBAPP_AUTOSCALE_METRIC_NAME
+    local operator=$WEBAPP_AUTOSCALE_OPERATOR
+    local threshold=$WEBAPP_AUTOSCALE_THRESHOLD
+    local time_grain=$WEBAPP_AUTOSCALE_TIME_GRAIN
+    local time_window=$WEBAPP_AUTOSCALE_TIME_WINDOW
+
+    logger "INFO" "Configuring custom autoscale for Web App: $webapp_name in Resource Group: $resource_group..."
+
+    # Create or update the autoscale setting
+    az monitor autoscale create --resource-group "$resource_group" \
+        --resource "$webapp_name" --resource-type Microsoft.Web/sites \
+        --name "$autoscale_name" --min-count "$min_count" --max-count "$max_count" --count "$count" \
+        --scale-out "scale up by $count instances if $metric_name $operator $threshold% for $time_window" \
+        --scale-in "scale down by $count instances if $metric_name $operator $threshold% for $time_window"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to configure autoscaling for Web App: $webapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Autoscaling configured successfully for Web App: $webapp_name."
+    return 0
+}
+
+# Function to enable custom autoscaling for a Spring App
+configure_metric_rule_autoscale_spring_app() {
+    local resource_group=$RESOURCE_GROUP
+    local springapp_name=$SPRING_APP_NAME
+    local autoscale_name=$SPRING_APP_AUTOSCALE_NAME
+    local min_count=$SPRING_APP_AUTOSCALE_MIN_COUNT
+    local max_count=$SPRING_APP_AUTOSCALE_MAX_COUNT
+    local count=$SPRING_APP_AUTOSCALE_COUNT
+    local metric_name=$SPRING_APP_AUTOSCALE_METRIC_NAME
+    local operator=$SPRING_APP_AUTOSCALE_OPERATOR
+    local threshold=$SPRING_APP_AUTOSCALE_THRESHOLD
+    local time_grain=$SPRING_APP_AUTOSCALE_TIME_GRAIN
+    local time_window=$SPRING_APP_AUTOSCALE_TIME_WINDOW
+
+    logger "INFO" "Configuring autoscale for Spring App: $springapp_name in Resource Group: $resource_group..."
+
+    # Create or update the autoscale setting
+    az monitor autoscale create --resource-group "$resource_group" \
+        --resource "$springapp_name" --resource-type Microsoft.AppPlatform/Spring \
+        --name "$autoscale_name" --min-count "$min_count" --max-count "$max_count" --count "$count" \
+        --scale-out "scale up by $count instances if $metric_name $operator $threshold% for $time_window" \
+        --scale-in "scale down by $count instances if $metric_name $operator $threshold% for $time_window"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to configure autoscaling for Spring App: $springapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Autoscaling configured successfully for Spring App: $springapp_name."
+    return 0
+}
