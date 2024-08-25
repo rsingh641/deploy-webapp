@@ -209,8 +209,6 @@ A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR
         - Start UI service.
       - **`ui_stop.sh`**
         - Stop UI service.
-      - **`ui_update.sh`**
-        - Update UI service.
     - **`./src/manage/webservice/`**
       - **`webservice_restart.sh`**
         - Restart web service.
@@ -218,8 +216,6 @@ A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR
         - Start web service.
       - **`webservice_stop.sh`**
         - Stop web service.
-      - **`webservice_update.sh`**
-        - Update web service.
 
   - **`./src/monitor/`**
     - Monitoring and alerting scripts.
@@ -239,10 +235,10 @@ A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR
 
   - **`./src/update/`**
     - Update scripts for applications.
-    - **`update_ui.sh`**
-      - Script to update the UI service.
-    - **`update_webservice.sh`**
-      - Script to update the web service.
+      - **`ui_update.sh`**
+        - Update UI service.
+      - **`webservice_update.sh`**
+        - Update web service.
 
 ## Getting Started
 
