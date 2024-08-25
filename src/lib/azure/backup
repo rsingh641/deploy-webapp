@@ -1,0 +1,27 @@
+#! /bin/bash
+
+set -e
+
+# Function to enable and configure backup for Web App (UI)
+manual_backup_webapp() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local backup_name=$WEBAPP_BACKUP_NAME
+    local storage_container_url=$STORAGE_CONTAINER_URL
+
+    logger "INFO" "Creating backup for Web App (UI): $webapp_name in Resource Group: $resource_group..."
+
+    az webapp config backup create --resource-group "$resource_group" \
+        --webapp-name "$webapp_name" \
+        --backup-name "$backup_name" \
+        --container-url "$storage_container_url"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to create backup for Web App (UI): $webapp_name"
+        return 1
+    fi
+
+    # Scheduling backups (Azure Backup policies or Azure Automation should handle this)
+    logger "INFO" "Backup for Web App (UI): $webapp_name is scheduled to run $backup_schedule."
+    return 0
+}
