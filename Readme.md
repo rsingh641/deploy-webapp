@@ -90,8 +90,8 @@ seamless failover capability in case of an emergency.
    - Run `./src/scaling/enable_autoscaling.sh` to enable autoscaling for ui and webservice instances.
 
 10. **Manual scaling**
-   - Run `./src/scaling/ui_scale.sh` to manually scale ui instances.
-   - Run `./src/scaling/webservice_scale.sh` to manually scale webservice instances.
+    - Run `./src/scaling/ui_scale.sh` to manually scale ui instances.
+    - Run `./src/scaling/webservice_scale.sh` to manually scale webservice instances.
 
 11. **Enable Monitoring**
    - Run `./src/monitor/enable_monitoring.sh` to enable monitoring of UI and Webservce instances using Application Insights.
