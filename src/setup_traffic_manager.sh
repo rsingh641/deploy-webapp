@@ -9,6 +9,8 @@ set -e
 source src/lib/initialize
 source src/lib/azure/traffic_manager
 
+logger "INFO" "Starting to deploy traffic manager resources in resource group $TRAFFIC_MANAGER_RESOURCE_GROUP"
+
 # Create seperate resource group for traffic manager resources 
 check_and_create_resource_group "$TRAFFIC_MANAGER_RESOURCE_GROUP"
 
@@ -21,4 +23,6 @@ add_traffic_manager_endpoint "$TRAFFIC_MANAGER_PROFILE" "$TRAFFIC_MANAGER_RESOUR
 
 # Configure health probes
 update_traffic_manager_health_probes "$TRAFFIC_MANAGER_PROFILE" "$TRAFFIC_MANAGER_RESOURCE_GROUP" "$HEALTH_CHECK_PATH" $HEALTH_CHECK_PORT
+
+logger "INFO" "Successfully created and configured health check and traffic manager configuration"
 
