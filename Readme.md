@@ -16,6 +16,7 @@ Functions have been provided to switch between Blue-Green deployments.
 - **Logging and Error Handling**: Comprehensive logging and error handling mechanisms for better visibility and troubleshooting.
 - **Traffic Management**: Integration with Azure Traffic Manager for load balancing and failover strategies.
 - **Observability**: Integration with Azure Application Insights for monitoring application performance and diagnostics.
+- **Disaster Recovery**: A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure seamless failover capability in case of an emergency.
 
 ## Directory Structure
 
