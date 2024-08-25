@@ -12,6 +12,7 @@ and managing environment-specific settings.
 - **Scaling and High Availability**: Functions for scaling applications and ensuring high availability through Traffic Manager profiles and Azure scaling capabilities.
 - **Logging and Error Handling**: Comprehensive logging and error handling mechanisms for better visibility and troubleshooting.
 - **Traffic Management**: Integration with Azure Traffic Manager for load balancing and failover strategies.
+- **Observability**: Integration with Azure Application Insights for monitoring application performance and diagnostics.
 
 ## Directory Structure
 
@@ -23,7 +24,7 @@ It uses Azure keyvault keys to encrypt secrets stored in repository.
 Configuration files for different environments and general settings.
 
 - **`./config/common`**: Contains common configuration properties used across all environments.
-  - `common.properties`: General properties.
+  - `common.properties`: General properties common for all environments.
   - `traffic_manager.properties`: Configuration for Traffic Manager.
 
 - **`./config/environments`**: Environment-specific configurations.
@@ -92,9 +93,17 @@ Scripts and source code for managing infrastructure and deployments.
 
 ## Logging
 
-Logs are managed by the `logging` module in `./src/lib/logging`. Ensure proper configuration for logging output.
+Logs are managed by the `logging` module in `./src/lib/logging`. Ensuring proper configuration for logging output.
+Logs are created at users home path "~/deploy_webapps/logs/deploy_YYYYMMDD_HHMMSS.log"
+Each run creates a new log file.
 
 ## Error Handling
 
-Errors are handled by the functions in `./src/lib/logging`. Ensure to check logs for any issues during script execution.
+The script intrupts immediately after encountering an error and displays the error on STDOUT and write to log file.
+Error line is of format "script_file line_no. failure message".
+Ensure to check logs for any issues during script execution.
+
+## Observability
+
+Application performance and diagnostics are monitored through Azure Application Insights.
 
