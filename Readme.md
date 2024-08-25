@@ -29,10 +29,10 @@ The Node.js UI is deployed in two slots on Azure Web App service, and the Java S
 
 # Project Features
 
-## Multi-Environment Configuration
+### Multi-Environment Configuration
 Supports configuration management across multiple environments (dev, test, prod, DR, Perf) with environment-specific properties and secrets, ensuring consistency and isolation of configurations.
 
-## Encrypted Secrets Management
+### Encrypted Secrets Management
 Utilizes SOPS for managing encrypted secrets, ensuring sensitive information is securely stored and accessible only with proper decryption.
 
 ## Automated Backup and Failover
