@@ -94,36 +94,36 @@ seamless failover capability in case of an emergency.
     - Run `./src/scaling/webservice_scale.sh` to manually scale webservice instances.
 
 11. **Enable Monitoring**
-   - Run `./src/monitor/enable_monitoring.sh` to enable monitoring of UI and Webservce instances using Application Insights.
+    - Run `./src/monitor/enable_monitoring.sh` to enable monitoring of UI and Webservce instances using Application Insights.
 
 12. **Enable Alerts**
-   - Run `./src/monitor/enable_alearts.sh` to enable metrics based email and sms alearts for UI and Webservice instances.
+    - Run `./src/monitor/enable_alearts.sh` to enable metrics based email and sms alearts for UI and Webservice instances.
 
 13. **Managing Instances**
-   - Run `./src/manage/ui/ui_restart.sh` to restart UI instance.
-   - Run `./src/manage/ui/ui_start.sh` to start UI instance.
-   - Run `./src/manage/ui/ui_stop.sh` to stop UI instance.
+    - Run `./src/manage/ui/ui_restart.sh` to restart UI instance.
+    - Run `./src/manage/ui/ui_start.sh` to start UI instance.
+    - Run `./src/manage/ui/ui_stop.sh` to stop UI instance.
 
-   - Run `./src/manage/webservice/webservice_restart.sh` to restart Webservice instance.
-   - Run `./src/manage/webservice/webservice_start.sh` to start Webservice instance.
-   - Run `./src/manage/webservice/webservice_stop.sh` to stop Webservice instance.
+    - Run `./src/manage/webservice/webservice_restart.sh` to restart Webservice instance.
+    - Run `./src/manage/webservice/webservice_start.sh` to start Webservice instance.
+    - Run `./src/manage/webservice/webservice_stop.sh` to stop Webservice instance.
 
 14. **Traffic Manager Setup** [only for Production and Disaster Recovery]
-   - Run `./src/global_resources/setup_traffic_manager.sh` to configure Traffic Manager profiles.
+    - Run `./src/global_resources/setup_traffic_manager.sh` to configure Traffic Manager profiles.
 
 15. **Front door Setup** [only for Production and Disaster Recovery]
-   - Run `./src/global_resources/setup_frontdoor.sh` to configure Front door resource and configure it.
+    - Run `./src/global_resources/setup_frontdoor.sh` to configure Front door resource and configure it.
 
 16. **Handling manual Failover** [only for Production and Disaster Recovery]
-   - Run `./src/failover/failover_to_DR.sh` to trigger failover from Prod to DR.
-   - Run `./src/failover/failover_to_Prod.sh` to trigger failover from DR to Prod.
+    - Run `./src/failover/failover_to_DR.sh` to trigger failover from Prod to DR.
+    - Run `./src/failover/failover_to_Prod.sh` to trigger failover from DR to Prod.
 
-   - Run `./src/failover/test_failover_to_DR.sh` to test the failover from Prod to DR.
-   - Run `./src/failover/test_failover_to_Prod.sh` to test the failover from DR to Prod.
+    - Run `./src/failover/test_failover_to_DR.sh` to test the failover from Prod to DR.
+    - Run `./src/failover/test_failover_to_Prod.sh` to test the failover from DR to Prod.
 
 17. **Enable Backups** [only for Production and Disaster Recovery]
-   - Run `./src/backup/enable_auto_backups.sh` to enable schedule backup of azure resources using Azure Backups.
-   - Run `./src/backup/manual_backup_webapp.sh` to trigger a manual backup of webapp using Azure Backups.
+    - Run `./src/backup/enable_auto_backups.sh` to enable schedule backup of azure resources using Azure Backups.
+    - Run `./src/backup/manual_backup_webapp.sh` to trigger a manual backup of webapp using Azure Backups.
 
 ## Logging
 
