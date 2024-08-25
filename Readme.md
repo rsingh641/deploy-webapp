@@ -27,6 +27,45 @@ The Node.js UI is deployed in two slots on Azure Web App service, and the Java S
 - **Disaster Recovery**: A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure seamless failover capability in case of an emergency.
 
 
+# Project Features
+
+## Multi-Environment Configuration
+Supports configuration management across multiple environments (dev, test, prod, DR, Perf) with environment-specific properties and secrets, ensuring consistency and isolation of configurations.
+
+## Encrypted Secrets Management
+Utilizes SOPS for managing encrypted secrets, ensuring sensitive information is securely stored and accessible only with proper decryption.
+
+## Automated Backup and Failover
+Includes scripts for enabling automatic backups, performing manual backups, and managing failovers between production and disaster recovery environments to ensure data resilience and availability.
+
+## Blue-Green Deployment Strategy
+Implements blue-green deployment scripts to facilitate zero-downtime deployments and smooth transitions between application versions, minimizing service disruption.
+
+## Infrastructure Automation
+Automates the creation and configuration of infrastructure components, such as application gateways, network resources, and autoscaling, reducing manual setup and configuration efforts.
+
+## Monitoring and Alerting
+Features scripts to enable monitoring and alerting, ensuring timely detection of issues and proactive management of application performance and health.
+
+## Scaling Management
+Provides scripts for scaling applications both vertically and horizontally, including autoscaling capabilities to handle varying loads and maintain performance.
+
+## UI and Web Service Management
+Contains scripts for managing UI and web service operations, including starting, stopping, restarting, and updating services, simplifying maintenance and operational tasks.
+
+## Template-Based Environment Creation
+Offers templates for creating new environment configurations, allowing for quick setup of new environments with predefined settings and properties.
+
+## Library of Azure Functions
+Includes a comprehensive set of libraries for interacting with Azure services, such as app gateway, key vault, and traffic manager, streamlining Azure resource management.
+
+## Detailed Logging and Initialization
+Provides logging utilities and initialization scripts to ensure proper setup and monitoring of application and infrastructure components.
+
+## Failover Mechanism Using Azure Traffic Manager
+Features a failover mechanism leveraging Azure Traffic Manager to ensure high availability between Production and Disaster Recovery (DR) environments. Traffic Manager routes traffic based on configured policies and health checks, enabling seamless failover from Prod to DR in case of a failure. Includes scripts for configuring Traffic Manager profiles and managing traffic routing between environments to maintain service continuity and minimize downtime.
+
+
 ## Directory Structure
 
 ### Configuration
