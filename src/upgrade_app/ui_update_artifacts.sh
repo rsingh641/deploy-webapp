@@ -3,7 +3,7 @@
 set -e
 
 source src/lib/initialize
-source src/lib/ui/ui_manage
+source src/lib/ui/ui_app_deploy
 
 logger "INFO" "Downloading app version ${APP_VERSION} artifacts"
 download_artifact

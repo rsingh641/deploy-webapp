@@ -3,7 +3,7 @@
 set -e
 
 source src/lib/initialize
-source src/lib/webservice/webservice_deploy
+source src/lib/webservice/webservice_app_deploy
 
 
 logger "INFO" "Downloading app version ${APP_VERSION} artifacts"
