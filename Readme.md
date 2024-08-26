@@ -69,11 +69,12 @@ Ensure to check logs for any issues during script execution.
 
 Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
 The threshold can be configured through properties
-**Metric based Alearts**
- 1. Node js Webapp CPU usage > 80%
- 2. Node js Webapp MEMORY usage > 80%
- 3. Spring Webservice CPU usage > 80%
- 4. Spring Webservice CPU usage > 80%
+
+  **Metric based Alearts**
+  1. Node js Webapp CPU usage > 80%
+  2. Node js Webapp MEMORY usage > 80%
+  3. Spring Webservice CPU usage > 80%
+  4. Spring Webservice CPU usage > 80%
 
 ### Autoscaling and Manual Scaling
 
