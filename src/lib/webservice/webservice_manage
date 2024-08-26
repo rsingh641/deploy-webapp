@@ -42,6 +42,46 @@ fetch_and_provide_db2_certs() {
 
 }
 
+# Function to fetch Oracle credentials from Key Vault and provide them to the Spring web service app
+fetch_and_provide_oracle_creds() {
+    local key_vault_name="$KEYVAULT_NAME"
+    local oracle_secret_name="$ORACLE_SECRET_NAME"
+    local spring_app_name="$SPRING_APP_NAME"
+    local spring_service_name="$SPRING_APP_SERVICE_NAME"
+    local resource_group="$RESOURCE_GROUP"
+    
+    logger "INFO" "Fetching Oracle credentials from Key Vault..."
+
+    # Retrieve the Oracle credentials secret from Key Vault
+    local oracle_creds
+    oracle_creds=$(az keyvault secret show --vault-name "$key_vault_name" --name "$oracle_secret_name" --query "value" --output tsv)
+
+    if [ $? -ne 0 ] || [ -z "$oracle_creds" ]; then
+        logger "ERROR" "Failed to retrieve Oracle credentials from Key Vault $key_vault_name"
+        exit 1
+    fi
+
+    # Parse the retrieved credentials
+    local oracle_username oracle_password
+    oracle_username=$(echo "$oracle_creds" | grep -oP '(?<=ORACLE_USERNAME=)[^\n]+')
+    oracle_password=$(echo "$oracle_creds" | grep -oP '(?<=ORACLE_PASSWORD=)[^\n]+')
+
+    if [ -z "$oracle_username" ] || [ -z "$oracle_password" ]; then
+        logger "ERROR" "Failed to parse Oracle credentials from the secret"
+        exit 1
+    fi
+
+    # Inject the Oracle credentials into the Spring Boot application as environment variables
+    set_spring_app_env_vars "ORACLE_USERNAME=$oracle_username" "ORACLE_PASSWORD=$oracle_password"
+    
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to set environment variables for the Spring Boot app"
+        exit 1
+    fi
+
+    logger "INFO" "Oracle credentials successfully provided to the Spring Boot app"
+}
+
 # Function for scaling webservice
 scale_spring_app() {
     logger "INFO" "Scaling Spring Boot Application..."
