@@ -42,7 +42,7 @@ The Node.js UI is deployed in two slots on Azure Web App service, and the Java S
 **Detailed Logging and Initialization**
 - Provides logging utilities and initialization scripts to ensure proper setup and monitoring of application and infrastructure components.
 
-**High Availability Straties Implemented**
+**High Availability Strategies Implemented**
 
   1. **Zone Redundancy Enabled for NodeJs Webapp and Spring Boot Webservice**
   2. **Metrics based Auto Scaling and Manual Scaling Enabled to deploy multiple instances**
