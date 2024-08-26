@@ -284,6 +284,8 @@ Application performance and diagnostics are monitored through Azure Application 
         - Azure front door management functions.
       - **`keyvault/`**
         - Azure Key Vault management functions.
+      - **`log_analytics/`**
+        - Azure Log Analytics management functions.
       - **`network/`**
         - Azure network management functions.
       - **`storage_acc/`**

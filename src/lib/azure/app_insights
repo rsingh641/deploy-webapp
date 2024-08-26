@@ -79,6 +79,71 @@ configure_app_insights_spring_app() {
     return 0
 }
 
+# Enable Azure Monitor for Spring Apps
+enable_spring_apps_monitoring() {
+    local spring_apps_service_name=$SPRING_APPS_SERVICE_NAME
+    local spring_apps_service_resource_id=$SPRING_APPS_SERVICE_RESOURCE_ID
+    local log_analytics_workspace_id=$LOG_ANALYTICS_WORKSPACE_ID
+
+    logger "INFO" "Enabling monitoring for Azure Spring Apps: $spring_apps_service_name..."
+
+    az monitor diagnostic-settings create --name "SpringAppsDiagnostics" --resource "$spring_apps_service_resource_id" --workspace "$log_analytics_workspace_id" \
+        --logs '[{"category": "ApplicationConsole", "enabled": true},{"category": "SystemLogs", "enabled": true}]' \
+        --metrics '[{"category": "AllMetrics", "enabled": true}]'
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to enable monitoring for Azure Spring Apps: $spring_apps_service_name"
+        return 1
+    fi
+
+    logger "INFO" "Monitoring enabled successfully for Azure Spring Apps: $spring_apps_service_name."
+    return 0
+}
+
+# Function to Enable Monitoring for Node.js Web App
+enable_nodejs_webapp_monitoring() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local log_analytics_workspace_id=$LOG_ANALYTICS_WORKSPACE_ID
+
+    logger "INFO" "Enabling monitoring for Node.js Web App: $webapp_name in Resource Group: $resource_group..."
+
+    # Enable diagnostics settings to send logs and metrics to Log Analytics Workspace
+    az monitor diagnostic-settings create \
+        --resource-group "$resource_group" \
+        --resource-id "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$resource_group/providers/Microsoft.Web/sites/$webapp_name" \
+        --workspace "$log_analytics_workspace_id" \
+        --logs '[{"category": "ApplicationLogs", "enabled": true},{"category": "HttpLogs", "enabled": true},{"category": "ConsoleLogs", "enabled": true}]' \
+        --metrics '[{"category": "AllMetrics", "enabled": true}]'
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to enable monitoring for Node.js Web App: $webapp_name"
+        return 1
+    fi
+
+    logger "INFO" "Monitoring enabled successfully for Node.js Web App: $webapp_name."
+    return 0
+}
+
+link_app_insights_to_log_analytics() {
+    local resource_group=$RESOURCE_GROUP
+    local app_insights_name=$APP_INSIGHTS_NAME
+    local log_analytics_workspace_id=$LOG_ANALYTICS_WORKSPACE_ID
+    local log_analytics_workspace_name=$LOG_ANALYTICS_WORKSPACE_NAME
+
+    logger "INFO" "Linking Application Insights: $app_insights_name to Log Analytics Workspace: $log_analytics_workspace_name..."
+
+    az monitor app-insights component connect-log-analytics --app "$app_insights_name" --resource-group "$resource_group" --workspace "$log_analytics_workspace_id"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to link Application Insights: $app_insights_name to Log Analytics Workspace: $log_analytics_workspace_name"
+        return 1
+    fi
+
+    logger "INFO" "Application Insights: $app_insights_name linked successfully to Log Analytics Workspace: $log_analytics_workspace_name."
+    return 0
+}
+
 # Function to create an action group
 create_action_group() {
     local resource_group=$RESOURCE_GROUP
@@ -102,6 +167,26 @@ create_action_group() {
     fi
 
     logger "INFO" "Action group $action_group_name created successfully."
+    return 0
+}
+
+# Configure Alerts for Application Insights
+configure_app_insights_alert() {
+    local resource_group=$RESOURCE_GROUP
+    local app_insights_name=$APP_INSIGHTS_NAME
+    local subscription_id=$SUBSCRIPTION_ID
+
+    logger "INFO" "Configuring alerts for Application Insights: $app_insights_name..."
+
+    az monitor metrics alert create --name "AppInsightsAlert" --resource-group "$resource_group" --scopes "/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/microsoft.insights/components/$app_insights_name" \
+        --condition "total requests > 100 where resultCode != 200" --window-size "5m" --evaluation-frequency "1m"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to configure alerts for Application Insights: $app_insights_name"
+        return 1
+    fi
+
+    logger "INFO" "Alerts configured successfully for Application Insights: $app_insights_name."
     return 0
 }
 
