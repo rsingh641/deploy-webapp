@@ -79,13 +79,13 @@ Azure Application Insights and Azure Log Workspace are used for Application perf
 
 ### Autoscaling and Manual Scaling
 
-Autoscaling and Manual Scaling has been implemented for both UI and Webservice. It properties can be configured in ui and webservice properties file
-Metrics based autoscaling is configured using "CpuPercentage" > 70%.
-The max and min count for webapp instances are controlled by configuration parameters.
+Autoscaling and Manual Scaling has been implemented for both UI and Webservice. It properties can be configured in ui and webservice properties file.
+ Metrics based autoscaling is configured using "CpuPercentage" > 70%.
+ The max and min count of instances for UI and Webservice are controlled by configuration parameters.
 
 **Manual scaling can be done using** 
   1. `./src/scaling/ui_sacle.sh`
-  2. `./src/scaling/webservice.sh`
+  2. `./src/scaling/webservice_scale.sh`
 
 
 ## Getting Started
