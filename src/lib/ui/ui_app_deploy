@@ -52,3 +52,24 @@ deploy_ui_artifact() {
     
     return 0
 }
+
+# Function to update UI artifacts for an Azure Web App service
+update_ui_artifacts() {
+    local resource_group=$RESOURCE_GROUP
+    local webapp_name=$WEBAPP_NAME
+    local artifact_path=$1
+
+    logger "INFO" "Updating UI artifacts for Web App: $webapp_name..."
+
+    # Deploy the new artifact to the Azure Web App
+    az webapp deployment source config-zip --resource-group "$resource_group" --name "$webapp_name" \
+        --src "$artifact_path"
+
+    if [ $? -ne 0 ]; then
+        logger "ERROR" "Failed to update UI artifacts for Web App: $webapp_name"
+        return 1
+    fi
+
+    logger "INFO" "UI artifacts updated successfully for Web App: $webapp_name."
+    return 0
+}

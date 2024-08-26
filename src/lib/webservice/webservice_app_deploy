@@ -27,12 +27,14 @@ deploy_webservice_artifacts() {
 
 # Function to update new version of webservice artifacts
 update_webservice_artifacts() {
+    local artifact="$1"
+
     # Update the Spring Boot application artifact
-    logger "INFO" "Updating Spring Boot application artifact to app: $SPRING_APP_NAME"
+    logger "INFO" "Updating Spring Boot application version ${APP_VERSION} artifact to app: $SPRING_APP_NAME"
 
     # Update the artifact to Azure Spring Apps
     update_artifact="az spring app deploy --name $SPRING_APP_NAME --service $SPRING_APPS_SERVICE --resource-group $RESOURCE_GROUP \
-                    --artifact-path $LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME --deployment-name $SPRING_APP_DEPLOYMENT_NAME \
+                    --artifact-path "$artifact" --deployment-name $SPRING_APP_DEPLOYMENT_NAME \
                     --runtime-version $SPRING_APP_RUNTIME_VERSION --version $APP_VERSION"
 
     eval "$update_artifact"
@@ -42,7 +44,7 @@ update_webservice_artifacts() {
         exit 1
     fi
 
-    logger "INFO" "Artifact [$LOCAL_ARTIFACT_DIR/$SPRING_APP_PACKAGE_NAME] updated successfully to Spring Boot app: $SPRING_APP_NAME"
+    logger "INFO" "Artifact ["$artifact"] updated successfully to Spring Boot app: $SPRING_APP_NAME"
 
 }
 
