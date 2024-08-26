@@ -53,6 +53,46 @@ The Node.js UI is deployed in two slots on Azure Web App service, and the Java S
 - A robust Disaster Recovery (DR) strategy is in place, with a fully functional DR environment hosted in a separate Azure region. The setup includes mechanisms for manually triggering failover, along with regular testing procedures to ensure 
 seamless failover capability in case of an emergency.
 
+## Logging
+
+Logs are managed by the `logging` module in `./src/lib/logging`. Ensuring proper configuration for logging output.
+Logs are created at users home path "~/deploy_webapps/logs/deploy_YYYYMMDD_HHMMSS.log"
+Each run creates a new log file.
+
+## Error Handling
+
+The script intrupts immediately after encountering an error and displays the error on STDOUT and write to log file.
+Error line is of format "script_file line_no. failure message".
+Ensure to check logs for any issues during script execution.
+
+## Observability
+
+Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
+The threshold can be configured through properties
+**Metric based Alearts**
+ 1. Node js Webapp CPU usage > 80%
+ 2. Node js Webapp MEMORY usage > 80%
+ 3. Spring Webservice CPU usage > 80%
+ 4. Spring Webservice CPU usage > 80%
+
+## Autoscaling and Manual Scaling
+Autoscaling and Manual Scaling has been implemented for both UI and Webservice. It properties can be configured in ui and webservice properties file
+Metrics based autoscaling is configured using "CpuPercentage" > 70%.
+The max and min count for webapp instances are controlled by configuration parameters.
+
+Manual scaling can be done using 
+  1. ./src/scaling/ui_sacle.sh
+  2. ./src/scaling/webservice.sh
+
+Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
+The threshold can be configured through properties
+**Metric based Alearts**
+ 1. Node js Webapp CPU usage > 80%
+ 2. Node js Webapp MEMORY usage > 80%
+ 3. Spring Webservice CPU usage > 80%
+ 4. Spring Webservice CPU usage > 80%
+
+
 ## Getting Started
 
 1. **Environment Configuration**
@@ -125,44 +165,6 @@ seamless failover capability in case of an emergency.
     - Run `./src/backup/enable_auto_backups.sh` to enable schedule backup of azure resources using Azure Backups.
     - Run `./src/backup/manual_backup_webapp.sh` to trigger a manual backup of webapp using Azure Backups.
 
-## Logging
-
-Logs are managed by the `logging` module in `./src/lib/logging`. Ensuring proper configuration for logging output.
-Logs are created at users home path "~/deploy_webapps/logs/deploy_YYYYMMDD_HHMMSS.log"
-Each run creates a new log file.
-
-## Error Handling
-
-The script intrupts immediately after encountering an error and displays the error on STDOUT and write to log file.
-Error line is of format "script_file line_no. failure message".
-Ensure to check logs for any issues during script execution.
-
-## Observability
-
-Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
-The threshold can be configured through properties
-**Metric based Alearts**
- 1. Node js Webapp CPU usage > 80%
- 2. Node js Webapp MEMORY usage > 80%
- 3. Spring Webservice CPU usage > 80%
- 4. Spring Webservice CPU usage > 80%
-
-## Autoscaling and Manual Scaling
-Autoscaling and Manual Scaling has been implemented for both UI and Webservice. It properties can be configured in ui and webservice properties file
-Metrics based autoscaling is configured using "CpuPercentage" > 70%.
-The max and min count for webapp instances are controlled by configuration parameters.
-
-Manual scaling can be done using 
-  1. ./src/scaling/ui_sacle.sh
-  2. ./src/scaling/webservice.sh
-
-Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
-The threshold can be configured through properties
-**Metric based Alearts**
- 1. Node js Webapp CPU usage > 80%
- 2. Node js Webapp MEMORY usage > 80%
- 3. Spring Webservice CPU usage > 80%
- 4. Spring Webservice CPU usage > 80%
 
 ## Directory Structure
 
