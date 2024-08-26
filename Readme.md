@@ -128,7 +128,7 @@ The max and min count for webapp instances are controlled by configuration param
     - Run `./src/scaling/webservice_scale.sh` to manually scale webservice instances.
 
 11. **Enable Monitoring**
-    - Run `./src/monitor/enable_monitoring.sh` to enable monitoring of UI and Webservce instances using Application Insights.
+    - Run `./src/monitor/enable_monitoring.sh` to enable monitoring of UI and Webservce instances using Application Insights and Azure Log Analytics Workspace
 
 12. **Enable Alerts**
     - Run `./src/monitor/enable_alearts.sh` to enable metrics based email and sms alearts for UI and Webservice instances.
