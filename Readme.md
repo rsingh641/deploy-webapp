@@ -158,7 +158,9 @@ Application performance and diagnostics are monitored through Azure Application 
     - **`common.properties`**
       - General properties applicable to all environments.
     - **`traffic_manager.properties`**
-      - Configuration settings for managing traffic.
+      - Configuration settings for Azure traffic manager.
+    - **`frontdoor.properties`**
+      - Configuration settings for managing Azure frontdoor settings.
 
   - **`./config/environments/`**
     - Environment-specific configuration files.
