@@ -139,8 +139,30 @@ Ensure to check logs for any issues during script execution.
 
 ## Observability
 
-Application performance and diagnostics are monitored through Azure Application Insights.
+Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
+The threshold can be configured through properties
+**Metric based Alearts**
+ 1. Node js Webapp CPU usage > 80%
+ 2. Node js Webapp MEMORY usage > 80%
+ 3. Spring Webservice CPU usage > 80%
+ 4. Spring Webservice CPU usage > 80%
 
+## Autoscaling and Manual Scaling
+Autoscaling and Manual Scaling has been implemented for both UI and Webservice. It properties can be configured in ui and webservice properties file
+Metrics based autoscaling is configured using "CpuPercentage" > 70%.
+The max and min count for webapp instances are controlled by configuration parameters.
+
+Manual scaling can be done using 
+  1. ./src/scaling/ui_sacle.sh
+  2. ./src/scaling/webservice.sh
+
+Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
+The threshold can be configured through properties
+**Metric based Alearts**
+ 1. Node js Webapp CPU usage > 80%
+ 2. Node js Webapp MEMORY usage > 80%
+ 3. Spring Webservice CPU usage > 80%
+ 4. Spring Webservice CPU usage > 80%
 
 ## Directory Structure
 

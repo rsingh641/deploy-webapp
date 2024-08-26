@@ -4,6 +4,7 @@ set -e
 
 source src/lib/initialize
 source src/lib/azure/app_insights
+source src/lib/azure/log_analytics
 
 # check if app_insights is enabled for the environment 
 # if yes then check app-insight instance is deployed
