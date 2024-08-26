@@ -21,24 +21,25 @@ set_spring_app_env_vars() {
     logger "INFO" "Successfully injected environment variables into Spring Boot application $spring_app_name."
 }
 
-# Main function to fetch DB2 certificates from Keyvault and provide them to the Spring webservice app
+# Main function to fetch DB2 certificates from Key Vault and provide them to the Spring web service app
 fetch_and_provide_db2_certs() {
     local key_vault_name=$KEYVAULT_NAME
     local spring_app_name=$SPRING_APP_NAME
     local resource_group=$RESOURCE_GROUP
-    local spring_service_name=$SPRING_SERVICE_NAME
+    local spring_service_name=$SPRING_APP_SERVICE_NAME
     local db2_client_cert_name=$DB2_CLIENT_CERT_NAME
-    local db2_client_key_name=$DB2_CLIENT_KEY_NAME
     local db2_ca_cert_name=$DB2_CA_CERT_NAME
 
-    # Fetch DB2 certificates from Key Vault
-    local db2_client_cert db2_client_key db2_ca_cert
-    db2_client_cert=$(fetch_secret_from_keyvault "$key_vault_name" "$db2_client_cert_name")
-    db2_client_key=$(fetch_secret_from_keyvault "$key_vault_name" "$db2_client_key_name")
-    db2_ca_cert=$(fetch_secret_from_keyvault "$key_vault_name" "$db2_ca_cert_name")
+    # Fetch the DB2 client certificate and key
+    local db2_client_cert=$(fetch_certificate_from_keyvault "$key_vault_name" "$db2_client_cert_name")
+    local db2_client_key=$(fetch_secret_from_keyvault "$key_vault_name" "${db2_client_cert_name}-key")
+    
+    # Fetch the DB2 CA certificate
+    local db2_ca_cert=$(fetch_certificate_from_keyvault "$key_vault_name" "$db2_ca_cert_name")
 
     # Injecting certificates into Spring Boot application as environment variables
     set_spring_app_env_vars "DB2_CLIENT_CERT=$db2_client_cert" "DB2_CLIENT_KEY=$db2_client_key" "DB2_CA_CERT=$db2_ca_cert"
+
 }
 
 # Function for scaling webservice
