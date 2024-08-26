@@ -56,7 +56,7 @@ seamless failover capability in case of an emergency.
 ### Logging
 
 Logs are managed by the `logging` module in `./src/lib/logging`. Ensuring proper configuration for logging output.
-Logs are created at users home path "~/deploy_webapps/logs/deploy_YYYYMMDD_HHMMSS.log"
+Logs are created at users home path "`~/deploy_webapps/logs/deploy_YYYYMMDD_HHMMSS.log`"
 Each run creates a new log file.
 
 ### Error Handling
@@ -67,8 +67,9 @@ Ensure to check logs for any issues during script execution.
 
 ### Observability
 
-Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoringtion group has been created to receive Email and SMS alearts of following type
-The threshold can be configured through properties
+Azure Application Insights and Azure Log Workspace are used for Application performance and diagnostics monititoring.
+  - Action group has been created to receive Email and SMS alearts of following type
+    The threshold for alerts can be configured through properties
 
   **Metric based Alearts**
   1. Node js Webapp CPU usage > 80%
@@ -83,8 +84,8 @@ Metrics based autoscaling is configured using "CpuPercentage" > 70%.
 The max and min count for webapp instances are controlled by configuration parameters.
 
 **Manual scaling can be done using** 
-  1. ./src/scaling/ui_sacle.sh
-  2. ./src/scaling/webservice.sh
+  1. `./src/scaling/ui_sacle.sh`
+  2. `./src/scaling/webservice.sh`
 
 
 ## Getting Started
