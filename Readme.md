@@ -42,7 +42,18 @@ The Node.js UI is deployed in two slots on Azure Web App service, and the Java S
 **Detailed Logging and Initialization**
 - Provides logging utilities and initialization scripts to ensure proper setup and monitoring of application and infrastructure components.
 
-**Azure Front Door for High Availability**
+**High Availability Straties Implemented**
+
+  1. **Zone Redundancy Enabled for NodeJs Webapp and Spring Boot Webservice**
+  2. **Metrics based Auto Scaling and Manual Scaling Enabled to deploy multiple instances**
+  3. **Blue-Green deployment strategy implemented for zero-downtime application upgrades**
+  4. **Multi-Region Deployment - Production and DR deployed in different regions**
+  5. **Traffic Routing with Azure Front Door Enabled**
+  6. **Health Probes and Automatic Failover Enabled**
+  7. **Continuous Monitoring and Alerting Enabled for both UI and Backend instances**
+  8. **Disaster Recovery (DR) with manual failover to DR Enabled**
+
+**Azure Front Door**
   - **Global Load Balancing**: Routes traffic to the nearest and healthiest backend for low latency and high performance.
   - **Health Probes & Failover**: Continuously monitors backend health, automatically rerouting traffic to healthy endpoints in case of failures.
   - **Traffic Routing**: Supports various routing methods (priority, weighted, geographic) for flexible traffic management.
